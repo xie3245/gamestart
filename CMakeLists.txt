@@ -20,3 +20,6 @@ add_executable(ramen_shop WIN32 main.cpp)
 
 # Link to the actual SDL3 library.
 target_link_libraries(ramen_shop PRIVATE SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf SDL3::SDL3)
+
+# Copy assets folder to build directory
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

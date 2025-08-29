@@ -24,6 +24,21 @@ namespace
     bool served = false;
 }
 
+std::string getBasePath()
+{
+    static std::string basePath = "";
+    if (basePath == "")
+    {
+        auto bPath = SDL_GetBasePath();
+        if (bPath)
+        {
+            basePath = std::string(bPath);
+            SDL_free(const_cast<char*>(bPath));
+        }
+    }
+    return basePath;
+}
+
 // Timer callback
 Uint32 SDLCALL onTimer(void * /*intervalPtr*/, Uint32 interval, Uint32 /*unused*/)
 {
@@ -33,13 +48,14 @@ Uint32 SDLCALL onTimer(void * /*intervalPtr*/, Uint32 interval, Uint32 /*unused*
 
 void drawPotFrame(Renderer &renderer, const SDL_FRect &potDst)
 {
-    static ImageTexture emptyPotTexture{renderer, "assets/pot1.png"};
-    static ImageTexture potWithWaterTexture{renderer, "assets/pot_with_water.png"};
-    static ImageTexture potWithRamenUncookedTexture{renderer, "assets/pot_with_ramen_uncooked.png"};
-    static ImageTexture potWithRamenHalfCookedTexture{renderer, "assets/pot_with_ramen_halfcooked.png"};
-    static ImageTexture potWithRamenHalfCookedFlippedTexture{renderer, "assets/pot_with_ramen_halfcooked1.png"};
-    static ImageTexture potWithRamenCookedTexture{renderer, "assets/pot_with_ramen_cooked.png"};
-    static ImageTexture potWithRamenBurntTexture{renderer, "assets/pot_with_ramen_burnt.png"};
+    static ImageTexture emptyPotTexture{renderer, (getBasePath() + "assets/pot_empty.png").c_str()};
+    static ImageTexture potWithWaterTexture{renderer, (getBasePath() + "assets/pot_with_water.png").c_str()};
+    static ImageTexture potWithBoilingWaterTexture{renderer, (getBasePath() + "assets/pot_with_boiling_water.png").c_str()};
+    static ImageTexture potWithRamenUncookedTexture{renderer, (getBasePath() + "assets/pot_with_ramen_uncooked.png").c_str()};
+    static ImageTexture potWithRamenHalfCookedTexture{renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked.png").c_str()};
+    static ImageTexture potWithRamenHalfCookedFlippedTexture{renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked1.png").c_str()};
+    static ImageTexture potWithRamenCookedTexture{renderer, (getBasePath() + "assets/pot_with_ramen_cooked.png").c_str()};
+    static ImageTexture potWithRamenBurntTexture{renderer, (getBasePath() + "assets/pot_with_ramen_burnt.png").c_str()};
 
     switch (ramenState)
     {
@@ -50,7 +66,7 @@ void drawPotFrame(Renderer &renderer, const SDL_FRect &potDst)
         potWithWaterTexture.show(renderer, potDst);
         break;
     case RamenState::WATER_BOILING:
-        potWithWaterTexture.show(renderer, potDst);
+        potWithBoilingWaterTexture.show(renderer, potDst);
         break;
     case RamenState::NOODLES_ADDED:
         potWithRamenUncookedTexture.show(renderer, potDst);
@@ -84,14 +100,14 @@ int main(int argc, char *argv[])
 
     Renderer renderer{};
     // Load textures
-    ImageTexture bgTexture{renderer, "assets/bg.png"};
-    ImageTexture burnerTexture{renderer, "assets/burner.png"};
-    ImageTexture ramenPkgTexture{renderer, "assets/ramen_pkg.png"};
-    ImageTexture sinkTexture = {renderer, "assets/sink.png"};
-    ImageTexture binTexture = {renderer, "assets/trash_bin_closed.png"};
-    ImageTexture bowlsTexture = {renderer, "assets/bowls.png"};
-    ImageTexture customerTexture = {renderer, "assets/customer_fox.png"};
-    ImageTexture customerServedTexture = {renderer, "assets/customer_fox_satisfied.png"};
+    ImageTexture bgTexture{renderer, (getBasePath() + "assets/bg.png").c_str()};
+    ImageTexture burnerTexture{renderer, (getBasePath() + "assets/burner.png").c_str()};
+    ImageTexture ramenPkgTexture{renderer, (getBasePath() + "assets/ramen_pkg.png").c_str()};
+    ImageTexture sinkTexture = {renderer, (getBasePath() + "assets/sink.png").c_str()};
+    ImageTexture binTexture = {renderer, (getBasePath() + "assets/trash_bin_closed.png").c_str()};
+    ImageTexture bowlsTexture = {renderer, (getBasePath() + "assets/bowls.png").c_str()};
+    ImageTexture customerTexture = {renderer, (getBasePath() + "assets/customer_fox.png").c_str()};
+    ImageTexture customerServedTexture = {renderer, (getBasePath() + "assets/customer_fox_satisfied.png").c_str()};
 
     SDL_AddTimer(2000, onTimer, nullptr);
 
@@ -116,6 +132,46 @@ int main(int argc, char *argv[])
         const SDL_FRect bowlsFRect = {670, 160, 100, 100};
         const SDL_Rect bowlsRect = {670, 160, 100, 100};
 
+        // Update boiling
+        if (ramenState != RamenState::EMPTY && ramenState != RamenState::WATER_BOILING && ramenState != RamenState::BURNT)
+        {
+            boilProgress += deltaTime * 0.2f;
+            if (boilProgress >= 1.0f)
+            {
+                boilProgress = 1.0f;
+            }
+        }
+
+        if (ramenState == RamenState::WATER_ADDED && boilProgress == 1)
+        {
+            ramenState = RamenState::WATER_BOILING;
+        }
+        else if (ramenState == RamenState::NOODLES_ADDED && boilProgress >= 0.5f)
+        {
+            ramenState = RamenState::COOKING;
+        }
+        else if (ramenState == RamenState::COOKING)
+        {
+            if (boilProgress == 1)
+            {
+                ramenState = RamenState::BURNT;
+                boilProgress = 0;
+            }
+        }
+        else if (ramenState == RamenState::HALF_COOKED && boilProgress >= 1)
+        {
+            ramenState = RamenState::COOKED;
+            boilProgress = 0;
+        }
+        else if (ramenState == RamenState::COOKED)
+        {
+            if (boilProgress == 1)
+            {
+                boilProgress = 0;
+                ramenState = RamenState::BURNT;
+            }
+        }
+
         while (SDL_PollEvent(&e))
         {
             mousePoint.x = static_cast<int>(e.button.x);
@@ -124,69 +180,36 @@ int main(int argc, char *argv[])
             if (e.type == SDL_EVENT_QUIT)
             {
                 quit = true;
-                continue;
+                break;
             }
-            else if (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+            else
             {
-                if (ramenState == RamenState::EMPTY && SDL_PointInRect(&mousePoint, &sinkRect))
+                if (ramenState == RamenState::EMPTY && (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) && SDL_PointInRect(&mousePoint, &sinkRect))
                 {
                     ramenState = RamenState::WATER_ADDED;
                 }
-                else if (ramenState == RamenState::WATER_ADDED && boilProgress >= 1)
-                {
-                    ramenState = RamenState::WATER_BOILING;
-                    boilProgress = 0;
-                }
-                else if (ramenState == RamenState::WATER_BOILING && SDL_PointInRect(&mousePoint, &pkgRect))
+                else if (ramenState == RamenState::WATER_BOILING && (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) && SDL_PointInRect(&mousePoint, &pkgRect))
                 {
                     ramenState = RamenState::NOODLES_ADDED;
-                }
-                else if (ramenState == RamenState::NOODLES_ADDED && boilProgress >= 0.5f)
-                {
-                    ramenState = RamenState::COOKING;
+                    boilProgress = 0;
                 }
                 else if (ramenState == RamenState::COOKING)
                 {
-                    if (boilProgress < 1 && SDL_PointInRect(&mousePoint, &potDst))
+                    if (boilProgress < 1 && (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) && SDL_PointInRect(&mousePoint, &potDst))
                     {
-                        ramenState == RamenState::HALF_COOKED;
+                        ramenState = RamenState::HALF_COOKED;
                         boilProgress = 0;
                     }
-                    else if (boilProgress >= 1)
-                    {
-                        ramenState = RamenState::BURNT;
-                        boilProgress = 0;
-                    }
-                }
-                else if (ramenState == RamenState::HALF_COOKED && boilProgress >= 1)
-                {
-                    ramenState = RamenState::COOKED;
-                    boilProgress = 0;
                 }
                 else if (ramenState == RamenState::COOKED)
                 {
-                    if (boilProgress > 1)
-                    {
-                        boilProgress = 0;
-                        ramenState = RamenState::BURNT;
-                    }
-                    else if (SDL_PointInRect(&mousePoint, &bowlsRect))
+                    if (SDL_PointInRect(&mousePoint, &bowlsRect) && (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN))
                     {
                         ramenState = RamenState::EMPTY;
                         served = true;
                         boilProgress = 0;
                     }
                 }
-            }
-        }
-
-        // Update boiling
-        if (ramenState != RamenState::EMPTY && ramenState != RamenState::WATER_BOILING)
-        {
-            boilProgress += deltaTime * 0.5f;
-            if (boilProgress >= 1.0f)
-            {
-                boilProgress = 1.0f;
             }
         }
 
