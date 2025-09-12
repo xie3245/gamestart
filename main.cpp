@@ -5,7 +5,7 @@
 #include "ramenCooking.h"
 #include "ui.h"
 #include "utils.h"
-#include "mixer.h"
+#include "sound.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,9 +18,14 @@ int main(int argc, char *argv[])
     float deltaTime = 0.0f;
 
     Renderer renderer{};
-    Mixer audioMixer{};
-    audioMixer.playBgm();
-
+    AudioMixer mx{};
+    using namespace std::chrono_literals;
+    SoundTrack bgm{mx, (getBasePath() + "assets/sounds/bgm.mp3").c_str(), 5s, true};
+    SoundTrack waterBoiling{mx, (getBasePath() + "assets/sounds/boiling_water.mp3").c_str()};
+    bgm.scaleVolume(0.3f);
+    bgm.play();
+    //waterBoiling.scaleVolume(1.f);
+    
     // Load textures
     ImageTexture bgTexture{renderer, (getBasePath() + "assets/bg.png").c_str()};
     ImageTexture burnerTexture{renderer, (getBasePath() + "assets/burner.png").c_str()};
@@ -33,7 +38,7 @@ int main(int argc, char *argv[])
 
     bool quit = false;
     SDL_Event e;
-    RamenCooking pot1{renderer};
+    RamenCooking pot1{renderer, waterBoiling};
 
     while (!quit)
     {

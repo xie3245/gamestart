@@ -19,7 +19,7 @@ add_subdirectory(vendored/SDL_image EXCLUDE_FROM_ALL)
 add_subdirectory(vendored/SDL_mixer EXCLUDE_FROM_ALL)
 
 # Create your game executable target as usual
-add_executable(ramen_shop WIN32 main.cpp ramenCooking.cpp renderer.cpp thread.cpp utils.cpp mutex.cpp mixer.cpp)
+add_executable(ramen_shop WIN32 main.cpp ramenCooking.cpp renderer.cpp thread.cpp utils.cpp mutex.cpp sound.cpp)
 
 # Link to the actual SDL3 library.
 target_link_libraries(ramen_shop PRIVATE SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf SDL3_mixer::SDL3_mixer SDL3::SDL3)

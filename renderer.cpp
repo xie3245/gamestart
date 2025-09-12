@@ -8,6 +8,7 @@ Renderer::Renderer() : m_window(SDL_CreateWindow("Ramen Shop", SCREEN_WIDTH, SCR
         std::cerr << "Failed to create renderer: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
+    SDL_SetRenderVSync(m_renderer, 1);
 }
 
 Renderer::~Renderer()

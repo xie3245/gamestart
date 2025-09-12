@@ -1,18 +1,20 @@
 #include "ramenCooking.h"
 #include "ui.h"
 #include "utils.h"
+#include "sound.h"
 
-RamenCooking::RamenCooking(Renderer &r) noexcept : m_renderer(r), m_state(RamenState::EMPTY),
-                                                   m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot")),
-                                                   m_mtx(),
-                                                   emptyPotTexture(m_renderer, (getBasePath() + "assets/pot_empty.png").c_str()),
-                                                   potWithWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_water.png").c_str()),
-                                                   potWithBoilingWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_boiling_water.png").c_str()),
-                                                   potWithRamenUncookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_uncooked.png").c_str()),
-                                                   potWithRamenHalfCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked.png").c_str()),
-                                                   potWithRamenHalfCookedFlippedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked1.png").c_str()),
-                                                   potWithRamenCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_cooked.png").c_str()),
-                                                   potWithRamenBurntTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_burnt.png").c_str())
+RamenCooking::RamenCooking(Renderer &r, const SoundTrack &boil) noexcept : m_renderer(r), m_state(RamenState::EMPTY),
+                                                                           m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot")),
+                                                                           m_mtx(),
+                                                                           emptyPotTexture(m_renderer, (getBasePath() + "assets/pot_empty.png").c_str()),
+                                                                           potWithWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_water.png").c_str()),
+                                                                           potWithBoilingWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_boiling_water.png").c_str()),
+                                                                           potWithRamenUncookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_uncooked.png").c_str()),
+                                                                           potWithRamenHalfCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked.png").c_str()),
+                                                                           potWithRamenHalfCookedFlippedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked1.png").c_str()),
+                                                                           potWithRamenCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_cooked.png").c_str()),
+                                                                           potWithRamenBurntTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_burnt.png").c_str()),
+                                                                           boilingWaterTrack(boil)
 {
 }
 
@@ -23,6 +25,7 @@ RamenCooking::~RamenCooking() noexcept
 
 void RamenCooking::show()
 {
+    static uint16_t puffCnt = 0;
     switch (m_state)
     {
     case RamenState::EMPTY:
@@ -32,8 +35,25 @@ void RamenCooking::show()
         potWithWaterTexture.show(m_renderer, potFDst);
         break;
     case RamenState::WATER_BOILING:
-        potWithBoilingWaterTexture.show(m_renderer, potFDst);
-        break;
+    {
+        if (puffCnt < 60)
+        {
+            ++puffCnt;
+        }
+        else
+        {
+            puffCnt = 0u;
+        }
+        if (puffCnt > 30u)
+        {
+            potWithBoilingWaterTexture.show(m_renderer, {298, 288, 132, 132});
+        }
+        else
+        {
+            potWithBoilingWaterTexture.show(m_renderer, potFDst);
+        }
+    }
+    break;
     case RamenState::NOODLES_ADDED:
         potWithRamenUncookedTexture.show(m_renderer, potFDst);
         break;
@@ -115,6 +135,7 @@ int RamenCooking::threadLoop()
         {
             this_thread::sleep(2s);
             m_state = RamenState::WATER_BOILING;
+            boilingWaterTrack.play();
         }
         break;
         case RamenState::NOODLES_ADDED:

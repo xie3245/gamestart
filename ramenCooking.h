@@ -4,6 +4,8 @@
 #include "imageTexture.h"
 #include "mutex.h"
 
+class SoundTrack;
+
 class RamenCooking final
 {
     enum class RamenState
@@ -19,7 +21,7 @@ class RamenCooking final
     };
 
 public:
-    explicit RamenCooking(Renderer &r) noexcept;
+    explicit RamenCooking(Renderer &r, const SoundTrack& boil) noexcept;
     ~RamenCooking() noexcept;
 
     void show();
@@ -42,4 +44,5 @@ private:
     ImageTexture potWithRamenHalfCookedFlippedTexture;
     ImageTexture potWithRamenCookedTexture;
     ImageTexture potWithRamenBurntTexture;
+    const SoundTrack& boilingWaterTrack;
 };
