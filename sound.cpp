@@ -27,18 +27,9 @@ MIX_Track *AudioMixer::createTrack() const noexcept
     return MIX_CreateTrack(m_mixer);
 }
 
-SoundTrack::SoundTrack(const AudioMixer &mixer, const char *path, std::chrono::milliseconds fadeIn, bool infiniteLoop) noexcept : m_audio(mixer.createAudio(path)),
+SoundTrack::SoundTrack(const AudioMixer &mixer, const char *path, std::chrono::milliseconds fadeIn) noexcept : m_audio(mixer.createAudio(path)),
                                                                                                                              m_track(mixer.createTrack()), m_props(SDL_CreateProperties())
 {
-    if (infiniteLoop)
-    {
-        SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
-    }
-/*     else
-    {
-        SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_LOOPS_NUMBER, 1);
-    } */
-
     SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_FADE_IN_MILLISECONDS_NUMBER, fadeIn.count()); // 5s fade-in
 
     if (!MIX_SetTrackAudio(m_track, m_audio))
@@ -54,9 +45,25 @@ SoundTrack::~SoundTrack() noexcept
     MIX_DestroyAudio(m_audio);
 }
 
-void SoundTrack::play() const noexcept
+void SoundTrack::playOnce() const noexcept
 {
-    if (!MIX_PlayTrack(m_track, m_props))
+    if (!SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_LOOPS_NUMBER, 1) || !MIX_PlayTrack(m_track, m_props))
+    {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+    }
+}
+
+void SoundTrack::playUntilStop() const noexcept
+{
+    if (!SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_LOOPS_NUMBER, -1) || !MIX_PlayTrack(m_track, m_props))
+    {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+    }
+}
+
+void SoundTrack::stop(Uint64 fadeOutFrames) const noexcept
+{
+    if (!MIX_StopTrack(m_track, fadeOutFrames))
     {
         std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
     }

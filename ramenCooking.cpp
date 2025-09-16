@@ -6,14 +6,14 @@
 RamenCooking::RamenCooking(Renderer &r, const SoundTrack &boil) noexcept : m_renderer(r), m_state(RamenState::EMPTY),
                                                                            m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot")),
                                                                            m_mtx(),
-                                                                           emptyPotTexture(m_renderer, (getBasePath() + "assets/pot_empty.png").c_str()),
-                                                                           potWithWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_water.png").c_str()),
-                                                                           potWithBoilingWaterTexture(m_renderer, (getBasePath() + "assets/pot_with_boiling_water.png").c_str()),
-                                                                           potWithRamenUncookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_uncooked.png").c_str()),
-                                                                           potWithRamenHalfCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked.png").c_str()),
-                                                                           potWithRamenHalfCookedFlippedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_halfcooked1.png").c_str()),
-                                                                           potWithRamenCookedTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_cooked.png").c_str()),
-                                                                           potWithRamenBurntTexture(m_renderer, (getBasePath() + "assets/pot_with_ramen_burnt.png").c_str()),
+                                                                           emptyPotTexture(getImage(ImageId::empty_pot, m_renderer)),
+                                                                           potWithWaterTexture(getImage(ImageId::pot_water_added, m_renderer)),
+                                                                           potWithBoilingWaterTexture(getImage(ImageId::pot_water_boiling, m_renderer)),
+                                                                           potWithRamenUncookedTexture(getImage(ImageId::pot_noodle_added, m_renderer)),
+                                                                           potWithRamenHalfCookedTexture(getImage(ImageId::pot_noodle_cooking, m_renderer)),
+                                                                           potWithRamenHalfCookedFlippedTexture(getImage(ImageId::pot_noodle_halfcooked, m_renderer)),
+                                                                           potWithRamenCookedTexture(getImage(ImageId::pot_noodle_cooked, m_renderer)),
+                                                                           potWithRamenBurntTexture(getImage(ImageId::pot_burnt, m_renderer)),
                                                                            boilingWaterTrack(boil)
 {
 }
@@ -107,6 +107,7 @@ void RamenCooking::handleMouseDown(const SDL_Point &downPt)
     {
         if (SDL_PointInRect(&downPt, &bowlsRect))
         {
+            boilingWaterTrack.stop();
             m_state = RamenState::EMPTY;
         }
     }
@@ -135,7 +136,7 @@ int RamenCooking::threadLoop()
         {
             this_thread::sleep(2s);
             m_state = RamenState::WATER_BOILING;
-            boilingWaterTrack.play();
+            boilingWaterTrack.playUntilStop();
         }
         break;
         case RamenState::NOODLES_ADDED:
@@ -150,6 +151,7 @@ int RamenCooking::threadLoop()
             LockGuard lock{m_mtx};
             if (m_state == RamenState::COOKING)
             {
+                boilingWaterTrack.stop();
                 m_state = RamenState::BURNT;
             }
         }
@@ -166,6 +168,7 @@ int RamenCooking::threadLoop()
             LockGuard lock{m_mtx};
             if (m_state == RamenState::COOKED)
             {
+                boilingWaterTrack.stop();
                 m_state = RamenState::BURNT;
             }
         }

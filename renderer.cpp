@@ -18,7 +18,7 @@ Renderer::~Renderer()
     SDL_Quit();
 }
 
-SDL_Texture *Renderer::loadTexture(const char *path)
+SDL_Texture *Renderer::loadTexture(const char *path) const
 {
     SDL_Texture *tex = IMG_LoadTexture(m_renderer, path);
     if (!tex)
@@ -28,23 +28,23 @@ SDL_Texture *Renderer::loadTexture(const char *path)
     return tex;
 }
 
-void Renderer::renderTexture(SDL_Texture *tex, const SDL_FRect &rect)
+void Renderer::renderTexture(SDL_Texture *tex, const SDL_FRect &rect) const
 {
     SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
 }
 
-void Renderer::fillRect(const SDL_FRect &rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+void Renderer::fillRect(const SDL_FRect &rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
 {
     SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
     SDL_RenderFillRect(m_renderer, &rect);
 }
 
-void Renderer::update()
+void Renderer::update() const
 {
     SDL_RenderPresent(m_renderer);
 }
 
-void Renderer::clear()
+void Renderer::clear() const
 {
     SDL_RenderClear(m_renderer);
 }

@@ -20,21 +20,21 @@ int main(int argc, char *argv[])
     Renderer renderer{};
     AudioMixer mx{};
     using namespace std::chrono_literals;
-    SoundTrack bgm{mx, (getBasePath() + "assets/sounds/bgm.mp3").c_str(), 5s, true};
+    SoundTrack bgm{mx, (getBasePath() + "assets/sounds/bgm.mp3").c_str(), 5s};
     SoundTrack waterBoiling{mx, (getBasePath() + "assets/sounds/boiling_water.mp3").c_str()};
     bgm.scaleVolume(0.3f);
-    bgm.play();
-    //waterBoiling.scaleVolume(1.f);
-    
+    bgm.playUntilStop();
+
     // Load textures
-    ImageTexture bgTexture{renderer, (getBasePath() + "assets/bg.png").c_str()};
-    ImageTexture burnerTexture{renderer, (getBasePath() + "assets/burner.png").c_str()};
-    ImageTexture ramenPkgTexture{renderer, (getBasePath() + "assets/ramen_pkg.png").c_str()};
-    ImageTexture sinkTexture = {renderer, (getBasePath() + "assets/sink.png").c_str()};
-    ImageTexture binTexture = {renderer, (getBasePath() + "assets/trash_bin_closed.png").c_str()};
-    ImageTexture bowlsTexture = {renderer, (getBasePath() + "assets/bowls.png").c_str()};
-    ImageTexture customerTexture = {renderer, (getBasePath() + "assets/customer_fox.png").c_str()};
-    ImageTexture customerServedTexture = {renderer, (getBasePath() + "assets/customer_fox_satisfied.png").c_str()};
+    auto  bgTexture = getImage(ImageId::bg, renderer);
+    auto  counterTexture = getImage(ImageId::counter_surface, renderer);
+    auto  burnerTexture = getImage(ImageId::burner, renderer);
+    auto  ramenPkgTexture = getImage(ImageId::ramenPkg, renderer);
+    auto  sinkTexture  = getImage(ImageId::sink, renderer);
+    auto  binTexture  = getImage(ImageId::bin, renderer);
+    auto  bowlsTexture  = getImage(ImageId::bowls, renderer);
+    auto  customerTexture  = getImage(ImageId::customer, renderer);
+    auto  emptyPotTexture = getImage(ImageId::empty_pot, renderer);
 
     bool quit = false;
     SDL_Event e;
@@ -66,10 +66,10 @@ int main(int argc, char *argv[])
         renderer.clear();
 
         // Draw background
-        SDL_FRect bgDst = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
         bgTexture.show(renderer, bgDst);
-
-        SDL_FRect burnerDst = {SCREEN_WIDTH * 0.3f, SCREEN_HEIGHT * 0.5f, 320, 300};
+        // Draw customer
+        customerTexture.show(renderer, custRect);
+        counterTexture.show(renderer, counterRect);
         burnerTexture.show(renderer, burnerDst);
 
         pot1.show();
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         // Draw ramen package, sink
         if (SDL_PointInRect(&mousePoint, &pkgRect))
         {
-            ramenPkgTexture.show(renderer, SDL_FRect{665, 485, 110, 110});
+            ramenPkgTexture.show(renderer, pkgLargeFRect);
         }
         else
         {
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
         if (SDL_PointInRect(&mousePoint, &sinkRect))
         {
-            sinkTexture.show(renderer, SDL_FRect{665, 375, 110, 110});
+            sinkTexture.show(renderer, sinkLargeFRect);
         }
         else
         {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
         if (SDL_PointInRect(&mousePoint, &binRect))
         {
-            binTexture.show(renderer, SDL_FRect{665, 265, 110, 110});
+            binTexture.show(renderer, binLargeFRect);
         }
         else
         {
@@ -104,18 +104,21 @@ int main(int argc, char *argv[])
 
         if (SDL_PointInRect(&mousePoint, &bowlsRect))
         {
-            bowlsTexture.show(renderer, SDL_FRect{665, 155, 110, 110});
+            bowlsTexture.show(renderer, bowlsLargeFRect);
         }
         else
         {
             bowlsTexture.show(renderer, bowlsFRect);
         }
 
-        // Draw customer
-
-        SDL_FRect custRect = {50, 100, 200, 200};
-
-        customerTexture.show(renderer, custRect);
+        if (SDL_PointInRect(&mousePoint, &potToolRect))
+        {
+            emptyPotTexture.show(renderer, potToolLargeFRect);
+        }
+        else
+        {
+            emptyPotTexture.show(renderer, potToolFRect);
+        }
 
         renderer.update();
     }

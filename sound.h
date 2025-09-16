@@ -20,11 +20,13 @@ private:
 class SoundTrack final
 {
 public:
-    SoundTrack(const AudioMixer& mixer, const char *path, std::chrono::milliseconds fadeIn = std::chrono::milliseconds{0u}, bool infiniteLoop = false) noexcept;
+    SoundTrack(const AudioMixer& mixer, const char *path, std::chrono::milliseconds fadeIn = std::chrono::milliseconds{0u}) noexcept;
     ~SoundTrack() noexcept;
 
     void scaleVolume(float ratio) noexcept;
-    void play() const noexcept;
+    void playOnce() const noexcept;
+    void playUntilStop() const noexcept;
+    void stop(Uint64 fadeOutFrames = 0u) const noexcept;
 
 private:
     MIX_Audio *m_audio;

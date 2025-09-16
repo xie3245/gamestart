@@ -2,9 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
-
-constexpr int SCREEN_WIDTH = 800;
-constexpr int SCREEN_HEIGHT = 600;
+#include "ui.h"
 
 class Renderer final
 {
@@ -13,15 +11,15 @@ public:
 
     ~Renderer();
 
-    SDL_Texture *loadTexture(const char *path);
+    SDL_Texture *loadTexture(const char *path) const;
 
-    void renderTexture(SDL_Texture *tex, const SDL_FRect &rect);
+    void renderTexture(SDL_Texture *tex, const SDL_FRect &rect) const;
 
-    void fillRect(const SDL_FRect &rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+    void fillRect(const SDL_FRect &rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const;
 
-    void update();
+    void update() const;
 
-    void clear();
+    void clear() const;
 
 private:
     SDL_Window *m_window = nullptr;
