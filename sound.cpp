@@ -3,11 +3,7 @@
 #include <iostream>
 
 AudioMixer::AudioMixer() noexcept : m_init(MIX_Init()),
-                          m_mixer(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)) /* ,
-                           m_bgm(MIX_LoadAudio(m_mixer, (getBasePath() + "assets/sounds/bgm.mp3").c_str(), false)),
-                           m_bgmTrack(MIX_CreateTrack(m_mixer)), m_bgmProps(SDL_CreateProperties()),
-                           m_waterBoiling(MIX_LoadAudio(m_mixer, (getBasePath() + "assets/sounds/boiling_water.mp3").c_str(), false)),
-                           m_waterBoilingTrack(MIX_CreateTrack(m_mixer)), m_waterBoilingProps(SDL_CreateProperties()) */
+                          m_mixer(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr))
 {
 }
 

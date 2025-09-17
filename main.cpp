@@ -14,27 +14,25 @@ int main(int argc, char *argv[])
         std::cerr << "SDL_Init failed: " << SDL_GetError() << std::endl;
         return -1;
     }
-    Uint64 lastTime = 0;
-    float deltaTime = 0.0f;
 
     Renderer renderer{};
     AudioMixer mx{};
     using namespace std::chrono_literals;
-    SoundTrack bgm{mx, (getBasePath() + "assets/sounds/bgm.mp3").c_str(), 5s};
-    SoundTrack waterBoiling{mx, (getBasePath() + "assets/sounds/boiling_water.mp3").c_str()};
+    SoundTrack bgm{mx, "assets/sounds/bgm.mp3", 5s};
+    SoundTrack waterBoiling{mx, "assets/sounds/boiling_water.mp3"};
     bgm.scaleVolume(0.3f);
     bgm.playUntilStop();
 
     // Load textures
-    auto  bgTexture = getImage(ImageId::bg, renderer);
-    auto  counterTexture = getImage(ImageId::counter_surface, renderer);
-    auto  burnerTexture = getImage(ImageId::burner, renderer);
-    auto  ramenPkgTexture = getImage(ImageId::ramenPkg, renderer);
-    auto  sinkTexture  = getImage(ImageId::sink, renderer);
-    auto  binTexture  = getImage(ImageId::bin, renderer);
-    auto  bowlsTexture  = getImage(ImageId::bowls, renderer);
-    auto  customerTexture  = getImage(ImageId::customer, renderer);
-    auto  emptyPotTexture = getImage(ImageId::empty_pot, renderer);
+    auto  bgTexture = getImage(ImageId::bg);
+    auto  counterTexture = getImage(ImageId::counter_surface);
+    auto  burnerTexture = getImage(ImageId::burner);
+    auto  ramenPkgTexture = getImage(ImageId::ramenPkg);
+    auto  sinkTexture  = getImage(ImageId::sink);
+    auto  binTexture  = getImage(ImageId::bin);
+    auto  bowlsTexture  = getImage(ImageId::bowls);
+    auto  customerTexture  = getImage(ImageId::customer);
+    auto  emptyPotTexture = getImage(ImageId::empty_pot);
 
     bool quit = false;
     SDL_Event e;

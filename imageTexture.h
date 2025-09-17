@@ -8,26 +8,30 @@
 class ImageTexture final
 {
 public:
-    ImageTexture(const Renderer &renderer, const char *path_to_img);
+    ImageTexture(const char *path_to_img);
 
     ~ImageTexture();
 
-    ImageTexture(ImageTexture&&) = default;
-    ImageTexture(const ImageTexture&) = default;
+    ImageTexture(ImageTexture &&) = default;
 
-    ImageTexture& operator=(ImageTexture&&) = default;
-    ImageTexture& operator=(const ImageTexture&) = default;
+    //TODO: delete?
+    ImageTexture(const ImageTexture &) = default;
+
+    ImageTexture &operator=(ImageTexture &&) = default;
+
+    //TODO: delete?
+    ImageTexture &operator=(const ImageTexture &) = default;
 
     void show(const Renderer &renderer, const SDL_FRect &rect) const;
 
 private:
-    SDL_Texture *m_texture = nullptr;
+    SDL_Surface *m_surface = nullptr;
+    mutable SDL_Texture *m_texture = nullptr;
 };
 
-enum class ImageId 
+enum class ImageId
 {
-    undefined = 0u,
-    bg,
+    bg = 0u,
     sink,
     sink_running_water,
     ramenPkg,
@@ -48,4 +52,4 @@ enum class ImageId
     last
 };
 
-const ImageTexture& getImage(ImageId id, const Renderer& rd);
+const ImageTexture &getImage(ImageId id);

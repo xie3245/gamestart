@@ -6,14 +6,14 @@
 RamenCooking::RamenCooking(Renderer &r, const SoundTrack &boil) noexcept : m_renderer(r), m_state(RamenState::EMPTY),
                                                                            m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot")),
                                                                            m_mtx(),
-                                                                           emptyPotTexture(getImage(ImageId::empty_pot, m_renderer)),
-                                                                           potWithWaterTexture(getImage(ImageId::pot_water_added, m_renderer)),
-                                                                           potWithBoilingWaterTexture(getImage(ImageId::pot_water_boiling, m_renderer)),
-                                                                           potWithRamenUncookedTexture(getImage(ImageId::pot_noodle_added, m_renderer)),
-                                                                           potWithRamenHalfCookedTexture(getImage(ImageId::pot_noodle_cooking, m_renderer)),
-                                                                           potWithRamenHalfCookedFlippedTexture(getImage(ImageId::pot_noodle_halfcooked, m_renderer)),
-                                                                           potWithRamenCookedTexture(getImage(ImageId::pot_noodle_cooked, m_renderer)),
-                                                                           potWithRamenBurntTexture(getImage(ImageId::pot_burnt, m_renderer)),
+                                                                           emptyPotTexture(getImage(ImageId::empty_pot)),
+                                                                           potWithWaterTexture(getImage(ImageId::pot_water_added)),
+                                                                           potWithBoilingWaterTexture(getImage(ImageId::pot_water_boiling)),
+                                                                           potWithRamenUncookedTexture(getImage(ImageId::pot_noodle_added)),
+                                                                           potWithRamenHalfCookedTexture(getImage(ImageId::pot_noodle_cooking)),
+                                                                           potWithRamenHalfCookedFlippedTexture(getImage(ImageId::pot_noodle_halfcooked)),
+                                                                           potWithRamenCookedTexture(getImage(ImageId::pot_noodle_cooked)),
+                                                                           potWithRamenBurntTexture(getImage(ImageId::pot_burnt)),
                                                                            boilingWaterTrack(boil)
 {
 }

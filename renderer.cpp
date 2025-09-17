@@ -28,9 +28,23 @@ SDL_Texture *Renderer::loadTexture(const char *path) const
     return tex;
 }
 
+SDL_Texture *Renderer::loadTexture(SDL_Surface* surf) const
+{
+    auto tex = SDL_CreateTextureFromSurface(m_renderer, surf);
+    if (!tex)
+    {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+        return nullptr;
+    }
+    return tex;
+}
+
 void Renderer::renderTexture(SDL_Texture *tex, const SDL_FRect &rect) const
 {
-    SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
+    if (!SDL_RenderTexture(m_renderer, tex, nullptr, &rect))
+    {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+    }
 }
 
 void Renderer::fillRect(const SDL_FRect &rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const

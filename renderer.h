@@ -12,6 +12,7 @@ public:
     ~Renderer();
 
     SDL_Texture *loadTexture(const char *path) const;
+    SDL_Texture *loadTexture(SDL_Surface *surf) const;
 
     void renderTexture(SDL_Texture *tex, const SDL_FRect &rect) const;
 
