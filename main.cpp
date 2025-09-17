@@ -22,15 +22,15 @@ int main(int argc, char* argv[]) {
     bgm.playUntilStop();
 
     // Load textures
-    auto bgTexture       = getImage(ImageId::bg);
-    auto counterTexture  = getImage(ImageId::counter_surface);
-    auto burnerTexture   = getImage(ImageId::burner);
-    auto ramenPkgTexture = getImage(ImageId::ramenPkg);
-    auto sinkTexture     = getImage(ImageId::sink);
-    auto binTexture      = getImage(ImageId::bin);
-    auto bowlsTexture    = getImage(ImageId::bowls);
-    auto customerTexture = getImage(ImageId::customer);
-    auto emptyPotTexture = getImage(ImageId::empty_pot);
+    const ImageTexture& bgTexture       = getImage(ImageId::bg);
+    const ImageTexture& counterTexture  = getImage(ImageId::counter_surface);
+    const ImageTexture& burnerTexture   = getImage(ImageId::burner);
+    const ImageTexture& ramenPkgTexture = getImage(ImageId::ramenPkg);
+    const ImageTexture& sinkTexture     = getImage(ImageId::sink);
+    const ImageTexture& binTexture      = getImage(ImageId::bin);
+    const ImageTexture& bowlsTexture    = getImage(ImageId::bowls);
+    const ImageTexture& customerTexture = getImage(ImageId::customer);
+    const ImageTexture& emptyPotTexture = getImage(ImageId::empty_pot);
 
     bool quit = false;
     SDL_Event e;

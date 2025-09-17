@@ -3,7 +3,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include "renderer.h"
-#include <map>
 
 class ImageTexture final {
 public:
@@ -11,15 +10,11 @@ public:
 
     ~ImageTexture();
 
-    ImageTexture(ImageTexture&&) = default;
+    ImageTexture(ImageTexture&&)      = default;
+    ImageTexture(const ImageTexture&) = delete;
 
-    // TODO: delete?
-    ImageTexture(const ImageTexture&) = default;
-
-    ImageTexture& operator=(ImageTexture&&) = default;
-
-    // TODO: delete?
-    ImageTexture& operator=(const ImageTexture&) = default;
+    ImageTexture& operator=(ImageTexture&&)      = default;
+    ImageTexture& operator=(const ImageTexture&) = delete;
 
     void show(const Renderer& renderer, const SDL_FRect& rect) const;
 
