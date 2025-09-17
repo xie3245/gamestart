@@ -2,10 +2,10 @@
 #include "ui.h"
 #include "utils.h"
 #include "sound.h"
+#include "imageTexture.h"
 
-RamenCooking::RamenCooking(Renderer& r, const SoundTrack& boil) noexcept
-    : m_renderer(r)
-    , m_state(RamenState::EMPTY)
+RamenCooking::RamenCooking(const SoundTrack& boil) noexcept
+    : m_state(RamenState::EMPTY)
     , m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot"))
     , m_mtx()
     , emptyPotTexture(getImage(ImageId::empty_pot))
@@ -20,14 +20,14 @@ RamenCooking::RamenCooking(Renderer& r, const SoundTrack& boil) noexcept
 
 RamenCooking::~RamenCooking() noexcept { m_thread.detach(); }
 
-void RamenCooking::show() {
+void RamenCooking::show(const Renderer& rend) {
     static uint16_t puffCnt = 0;
     switch (m_state) {
     case RamenState::EMPTY:
-        emptyPotTexture.show(m_renderer, potFDst);
+        emptyPotTexture.show(rend, potFDst);
         break;
     case RamenState::WATER_ADDED:
-        potWithWaterTexture.show(m_renderer, potFDst);
+        potWithWaterTexture.show(rend, potFDst);
         break;
     case RamenState::WATER_BOILING: {
         if (puffCnt < 60) {
@@ -36,25 +36,25 @@ void RamenCooking::show() {
             puffCnt = 0u;
         }
         if (puffCnt > 30u) {
-            potWithBoilingWaterTexture.show(m_renderer, {298, 288, 132, 132});
+            potWithBoilingWaterTexture.show(rend, {298, 288, 132, 132});
         } else {
-            potWithBoilingWaterTexture.show(m_renderer, potFDst);
+            potWithBoilingWaterTexture.show(rend, potFDst);
         }
     } break;
     case RamenState::NOODLES_ADDED:
-        potWithRamenUncookedTexture.show(m_renderer, potFDst);
+        potWithRamenUncookedTexture.show(rend, potFDst);
         break;
     case RamenState::COOKING:
-        potWithRamenHalfCookedTexture.show(m_renderer, potFDst);
+        potWithRamenHalfCookedTexture.show(rend, potFDst);
         break;
     case RamenState::HALF_COOKED:
-        potWithRamenHalfCookedFlippedTexture.show(m_renderer, potFDst);
+        potWithRamenHalfCookedFlippedTexture.show(rend, potFDst);
         break;
     case RamenState::COOKED:
-        potWithRamenCookedTexture.show(m_renderer, potFDst);
+        potWithRamenCookedTexture.show(rend, potFDst);
         break;
     case RamenState::BURNT:
-        potWithRamenBurntTexture.show(m_renderer, potFDst);
+        potWithRamenBurntTexture.show(rend, potFDst);
         break;
     default:
         break;

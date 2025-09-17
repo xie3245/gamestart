@@ -1,26 +1,25 @@
 #pragma once
 
 #include "thread.h"
-#include "imageTexture.h"
 #include "mutex.h"
 
 class SoundTrack;
-
+class ImageTexture;
+class SDL_Point;
+class Renderer;
 class RamenCooking final {
     enum class RamenState { EMPTY, WATER_ADDED, WATER_BOILING, NOODLES_ADDED, COOKING, HALF_COOKED, COOKED, BURNT };
 
 public:
-    explicit RamenCooking(Renderer& r, const SoundTrack& boil) noexcept;
+    explicit RamenCooking(const SoundTrack& boil) noexcept;
     ~RamenCooking() noexcept;
 
-    void show();
+    void show(const Renderer& rend);
 
     void handleMouseDown(const SDL_Point& downPt);
 
 private:
     int threadLoop();
-
-    Renderer& m_renderer;
     RamenState m_state;
     uint8_t m_progress = 0;
     Thread<int()> m_thread;

@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "utils.h"
 #include "sound.h"
+#include "imageTexture.h"
 
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -34,7 +35,7 @@ int main(int argc, char* argv[]) {
 
     bool quit = false;
     SDL_Event e;
-    RamenCooking pot1{renderer, waterBoiling};
+    RamenCooking pot1{waterBoiling};
 
     while (!quit) {
         SDL_Point mousePoint;
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]) {
         counterTexture.show(renderer, counterRect);
         burnerTexture.show(renderer, burnerDst);
 
-        pot1.show();
+        pot1.show(renderer);
 
         // Draw ramen package, sink
         if (SDL_PointInRect(&mousePoint, &pkgRect)) {
