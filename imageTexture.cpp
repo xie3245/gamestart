@@ -1,31 +1,24 @@
 #include "imageTexture.h"
 #include "utils.h"
 
-ImageTexture::ImageTexture(const char *path_to_img) : m_surface(IMG_Load(path_to_img)), m_texture(nullptr)
-{
-}
+ImageTexture::ImageTexture(const char* path_to_img) : m_surface(IMG_Load(path_to_img)), m_texture(nullptr) {}
 
-ImageTexture::~ImageTexture()
-{
+ImageTexture::~ImageTexture() {
     SDL_DestroyTexture(m_texture);
     SDL_DestroySurface(m_surface);
 }
 
-void ImageTexture::show(const Renderer &renderer, const SDL_FRect &rect) const
-{
-    if (!m_texture)
-    {
+void ImageTexture::show(const Renderer& renderer, const SDL_FRect& rect) const {
+    if (!m_texture) {
         m_texture = renderer.loadTexture(m_surface);
     }
 
-    if(m_texture)
-    {
+    if (m_texture) {
         renderer.renderTexture(m_texture, rect);
     }
 }
 
-const ImageTexture &getImage(ImageId id)
-{
+const ImageTexture& getImage(ImageId id) {
     static ImageTexture defaultTexture{"assets/undefined.png"};
     static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
                                       {"assets/sink.png"},
@@ -46,8 +39,7 @@ const ImageTexture &getImage(ImageId id)
                                       {"assets/pot_with_ramen_burnt.png"},
                                       {"assets/customer_fox.png"}};
 
-    if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last))
-    {
+    if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last)) {
         return imageMap[static_cast<size_t>(id)];
     }
     return defaultTexture;

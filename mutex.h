@@ -2,8 +2,7 @@
 
 #include <SDL3/SDL_mutex.h>
 
-class Mutex final
-{
+class Mutex final {
 public:
     Mutex() noexcept;
     ~Mutex() noexcept;
@@ -13,15 +12,14 @@ public:
     void unlock() noexcept;
 
 private:
-    SDL_Mutex *m_handle;
+    SDL_Mutex* m_handle;
 };
 
-class LockGuard final
-{
+class LockGuard final {
 public:
-    LockGuard(Mutex &mtx) noexcept;
+    LockGuard(Mutex& mtx) noexcept;
     ~LockGuard() noexcept;
 
 private:
-    Mutex &m_mtx;
+    Mutex& m_mtx;
 };
