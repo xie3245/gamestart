@@ -67,31 +67,31 @@ int main(int argc, char* argv[]) {
 
         // Draw ramen package, sink
         if (SDL_PointInRect(&mousePoint, &pkgRect)) {
-            ramenPkgTexture.show(renderer, pkgLargeFRect);
+            ramenPkgTexture.show(renderer, enlarge(pkgFRect));
         } else {
             ramenPkgTexture.show(renderer, pkgFRect);
         }
 
         if (SDL_PointInRect(&mousePoint, &sinkRect)) {
-            sinkTexture.show(renderer, sinkLargeFRect);
+            sinkTexture.show(renderer, enlarge(sinkFRect));
         } else {
             sinkTexture.show(renderer, sinkFRect);
         }
 
         if (SDL_PointInRect(&mousePoint, &binRect)) {
-            binTexture.show(renderer, binLargeFRect);
+            binTexture.show(renderer, enlarge(binFRect));
         } else {
             binTexture.show(renderer, binFRect);
         }
 
         if (SDL_PointInRect(&mousePoint, &bowlsRect)) {
-            bowlsTexture.show(renderer, bowlsLargeFRect);
+            bowlsTexture.show(renderer, enlarge(bowlsFRect));
         } else {
             bowlsTexture.show(renderer, bowlsFRect);
         }
 
         if (SDL_PointInRect(&mousePoint, &potToolRect)) {
-            emptyPotTexture.show(renderer, potToolLargeFRect);
+            emptyPotTexture.show(renderer, enlarge(potToolFRect));
         } else {
             emptyPotTexture.show(renderer, potToolFRect);
         }

@@ -36,7 +36,7 @@ void RamenCooking::show(const Renderer& rend) {
             puffCnt = 0u;
         }
         if (puffCnt > 30u) {
-            potWithBoilingWaterTexture.show(rend, {298, 288, 132, 132});
+            potWithBoilingWaterTexture.show(rend, enlarge(potFDst));
         } else {
             potWithBoilingWaterTexture.show(rend, potFDst);
         }
