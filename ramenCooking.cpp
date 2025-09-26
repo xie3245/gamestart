@@ -6,7 +6,7 @@
 
 RamenCooking::RamenCooking(const SoundTrack& boil) noexcept
     : m_state(RamenState::EMPTY)
-    , m_thread(Thread<int()>::fromMethod<RamenCooking, &threadLoop>(this, "pot"))
+    , m_thread(Thread<int()>::fromMethod<RamenCooking, &RamenCooking::threadLoop>(this, "pot"))
     , m_mtx()
     , emptyPotTexture(getImage(ImageId::empty_pot))
     , potWithWaterTexture(getImage(ImageId::pot_water_added))

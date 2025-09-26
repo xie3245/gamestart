@@ -5,7 +5,7 @@
 
 class SoundTrack;
 class ImageTexture;
-class SDL_Point;
+struct SDL_Point;
 class Renderer;
 class RamenCooking final {
     enum class RamenState { EMPTY, WATER_ADDED, WATER_BOILING, NOODLES_ADDED, COOKING, HALF_COOKED, COOKED, BURNT };
