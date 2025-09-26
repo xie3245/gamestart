@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "sound.h"
 #include "imageTexture.h"
+#include "element.h"
 
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -26,12 +27,16 @@ int main(int argc, char* argv[]) {
     const ImageTexture& bgTexture       = getImage(ImageId::bg);
     const ImageTexture& counterTexture  = getImage(ImageId::counter_surface);
     const ImageTexture& burnerTexture   = getImage(ImageId::burner);
-    const ImageTexture& ramenPkgTexture = getImage(ImageId::ramenPkg);
-    const ImageTexture& sinkTexture     = getImage(ImageId::sink);
-    const ImageTexture& binTexture      = getImage(ImageId::bin);
-    const ImageTexture& bowlsTexture    = getImage(ImageId::bowls);
     const ImageTexture& customerTexture = getImage(ImageId::customer);
-    const ImageTexture& emptyPotTexture = getImage(ImageId::empty_pot);
+
+    Element all[] = {{pkgRect, ImageId::ramenPkg, updateFunc::fromFunction<updateSideBarFixItem>()},
+                     {sinkRect, ImageId::sink, updateFunc::fromFunction<updateSideBarFixItem>()},
+                     {binRect, ImageId::bin, updateFunc::fromFunction<updateSideBarFixItem>()},
+                     {bowlsRect, ImageId::bowls, updateFunc::fromFunction<updateSideBarFixItem>()},
+                     {potToolRect, ImageId::empty_pot, updateFunc::fromFunction<updateSideBarFixItem>()},
+                     {pkgRect, ImageId::ramenPkg, updateFunc::fromFunction<updateCookingItem>(), false},
+                     {bowlsRect, ImageId::empty_bowl, updateFunc::fromFunction<updateCookingItem>(), false},
+                     {potToolRect, ImageId::empty_pot, updateFunc::fromFunction<updateCookingItem>(), false}};
 
     bool quit = false;
     SDL_Event e;
@@ -47,9 +52,12 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_EVENT_QUIT) {
                 quit = true;
                 break;
-            } else {
+            } else if (isMouse(e)) {
                 if (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                     pot1.handleMouseDown(mousePoint);
+                }
+                for (Element& elem : all) {
+                    elem.update(elem, mousePoint, e.type);
                 }
             }
         }
@@ -58,42 +66,18 @@ int main(int argc, char* argv[]) {
 
         // Draw background
         bgTexture.show(renderer, bgDst);
-        // Draw customer
-        customerTexture.show(renderer, custRect);
+        customerTexture.show(renderer, custFRect);
         counterTexture.show(renderer, counterRect);
         burnerTexture.show(renderer, burnerDst);
 
         pot1.show(renderer);
 
         // Draw ramen package, sink
-        if (SDL_PointInRect(&mousePoint, &pkgRect)) {
-            ramenPkgTexture.show(renderer, enlarge(pkgFRect));
-        } else {
-            ramenPkgTexture.show(renderer, pkgFRect);
-        }
-
-        if (SDL_PointInRect(&mousePoint, &sinkRect)) {
-            sinkTexture.show(renderer, enlarge(sinkFRect));
-        } else {
-            sinkTexture.show(renderer, sinkFRect);
-        }
-
-        if (SDL_PointInRect(&mousePoint, &binRect)) {
-            binTexture.show(renderer, enlarge(binFRect));
-        } else {
-            binTexture.show(renderer, binFRect);
-        }
-
-        if (SDL_PointInRect(&mousePoint, &bowlsRect)) {
-            bowlsTexture.show(renderer, enlarge(bowlsFRect));
-        } else {
-            bowlsTexture.show(renderer, bowlsFRect);
-        }
-
-        if (SDL_PointInRect(&mousePoint, &potToolRect)) {
-            emptyPotTexture.show(renderer, enlarge(potToolFRect));
-        } else {
-            emptyPotTexture.show(renderer, potToolFRect);
+        for (const Element& elem : all) {
+            if (elem.visible) {
+                const ImageTexture& img = getImage(elem.id);
+                img.show(renderer, elem.fpos, elem.ratio, elem.angle);
+            }
         }
 
         renderer.update();

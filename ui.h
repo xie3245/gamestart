@@ -2,7 +2,7 @@
 #include <SDL3/SDL.h>
 #include <algorithm>
 
-bool isMouseButtonMovement(const SDL_Event& e) noexcept;
+bool isMouse(const SDL_Event& e) noexcept;
 
 SDL_FRect enlarge(const SDL_FRect& orig, float ratio = 1.2f) noexcept;
 
@@ -14,8 +14,8 @@ constexpr SDL_FRect bgDst = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
 constexpr float counterHeight   = SCREEN_HEIGHT * 0.4f;
 constexpr SDL_FRect counterRect = {0, counterHeight, SCREEN_WIDTH, 0.12f * SCREEN_HEIGHT};
 
-constexpr float cusSize      = SCREEN_WIDTH * 0.2f;
-constexpr SDL_FRect custRect = {SCREEN_WIDTH * 0.1f, counterHeight - 0.8f * cusSize, cusSize, cusSize};
+constexpr float cusSize       = SCREEN_WIDTH * 0.2f;
+constexpr SDL_FRect custFRect = {SCREEN_WIDTH * 0.1f, counterHeight - 0.8f * cusSize, cusSize, cusSize};
 
 constexpr float columnX            = SCREEN_WIDTH * 0.85f;
 constexpr float columnFirstY       = SCREEN_HEIGHT * 0.8f;

@@ -8,37 +8,38 @@ ImageTexture::~ImageTexture() {
     SDL_DestroySurface(m_surface);
 }
 
-void ImageTexture::show(const Renderer& renderer, const SDL_FRect& rect) const {
+void ImageTexture::show(const Renderer& renderer, const SDL_FRect& rect, float ratio, double angle) const {
     if (!m_texture) {
         m_texture = renderer.loadTexture(m_surface);
     }
 
     if (m_texture) {
-        renderer.renderTexture(m_texture, rect);
+        renderer.renderTexture(m_texture, rect, ratio, angle);
     }
 }
 
-const ImageTexture& getImage(ImageId id) {
-    static ImageTexture defaultTexture{"assets/undefined.png"};
-    static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
-                                      {"assets/sink.png"},
-                                      {"assets/sink_water_running.png"},
-                                      {"assets/ramen_pkg.png"},
-                                      {"assets/bowls.png"},
-                                      {"assets/trash_bin_closed.png"},
-                                      {"assets/trash_bin_open.png"},
-                                      {"assets/counter_surface_lean.png"},
-                                      {"assets/burner.png"},
-                                      {"assets/pot_empty.png"},
-                                      {"assets/pot_with_water.png"},
-                                      {"assets/pot_with_boiling_water.png"},
-                                      {"assets/pot_with_ramen_uncooked.png"},
-                                      {"assets/pot_with_ramen_halfcooked.png"},
-                                      {"assets/pot_with_ramen_halfcooked1.png"},
-                                      {"assets/pot_with_ramen_cooked.png"},
-                                      {"assets/pot_with_ramen_burnt.png"},
-                                      {"assets/customer_fox.png"}};
+static ImageTexture defaultTexture{"assets/undefined.png"};
+static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
+                                  {"assets/sink.png"},
+                                  {"assets/sink_water_running.png"},
+                                  {"assets/ramen_pkg.png"},
+                                  {"assets/bowls.png"},
+                                  {"assets/empty_bowl.png"},
+                                  {"assets/trash_bin_closed.png"},
+                                  {"assets/trash_bin_open.png"},
+                                  {"assets/counter_surface_lean.png"},
+                                  {"assets/burner.png"},
+                                  {"assets/pot_empty.png"},
+                                  {"assets/pot_with_water.png"},
+                                  {"assets/pot_with_boiling_water.png"},
+                                  {"assets/pot_with_ramen_uncooked.png"},
+                                  {"assets/pot_with_ramen_halfcooked.png"},
+                                  {"assets/pot_with_ramen_halfcooked1.png"},
+                                  {"assets/pot_with_ramen_cooked.png"},
+                                  {"assets/pot_with_ramen_burnt.png"},
+                                  {"assets/customer_fox.png"}};
 
+const ImageTexture& getImage(ImageId id) {
     if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last)) {
         return imageMap[static_cast<size_t>(id)];
     }

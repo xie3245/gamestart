@@ -16,7 +16,7 @@ public:
     ImageTexture& operator=(ImageTexture&&)      = default;
     ImageTexture& operator=(const ImageTexture&) = delete;
 
-    void show(const Renderer& renderer, const SDL_FRect& rect) const;
+    void show(const Renderer& renderer, const SDL_FRect& rect, float ratio = 1.f, double angle = 0.0) const;
 
 private:
     SDL_Surface* m_surface         = nullptr;
@@ -29,6 +29,7 @@ enum class ImageId {
     sink_running_water,
     ramenPkg,
     bowls,
+    empty_bowl,
     bin,
     bin_open,
     counter_surface,

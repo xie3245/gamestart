@@ -1,6 +1,6 @@
 #include "ui.h"
 
-bool isMouseButtonMovement(const SDL_Event& e) noexcept {
+bool isMouse(const SDL_Event& e) noexcept {
     return (e.type >= SDL_EVENT_MOUSE_MOTION) && (e.type <= SDL_EVENT_MOUSE_BUTTON_UP);
 }
 

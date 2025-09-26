@@ -5,7 +5,7 @@ class Delegate {};
 
 template <typename R, typename... Args>
 class Delegate<R(Args...)> final {
-    using StubType = R (*)(void*, Args...);
+    using StubType = R (*)(void*, Args&&...);
 
 public:
     template <R (*Func)(Args...)>
@@ -22,6 +22,8 @@ public:
     static Delegate fromMethod(const T* obj) {
         return Delegate(obj, constMethodStub<T, Method>);
     }
+
+    R operator()(Args... args) { return m_func(m_obj, std::forward<Args>(args)...); }
 
 private:
     template <R (*Func)(Args...)>
