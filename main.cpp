@@ -15,9 +15,7 @@ Element all[] = {{potToolRect, ElementId::potSideBar, ImageId::empty_pot, true},
                  {sinkRect, ElementId::sinkSideBar, ImageId::sink, true},
                  {binRect, ElementId::binSideBar, ImageId::bin, true},
                  {bowlsRect, ElementId::bowlsSideBar, ImageId::bowls, true},
-                 {pkgRect, ElementId::ramenItem, ImageId::ramenPkg, false, false},
                  {bowlsRect, ElementId::bowlsItem, ImageId::empty_bowl, false, false},
-                 {potToolRect, ElementId::potItem, ImageId::empty_pot, false, false},
                  {potDst1, ElementId::cookingSlot1, ImageId::empty_pot, false, false},
                  {potDst2, ElementId::cookingSlot2, ImageId::empty_pot, false, false},
                  {potDst3, ElementId::cookingSlot3, ImageId::empty_pot, false, false},
@@ -151,6 +149,9 @@ int main(int argc, char* argv[]) {
             }
         }
         auto now = std::chrono::milliseconds(SDL_GetTicks());
+        for (RamenCooking& r : slots) {
+            r.handleTick(now);
+        }
         sideBar.handleTick(now);
         renderer.clear();
 
@@ -169,7 +170,7 @@ int main(int argc, char* argv[]) {
         }
         // cooking slots
         for (const RamenCooking& r : slots) {
-            r.show(renderer);
+            r.show(renderer, mousePoint.x, mousePoint.y);
         }
         renderer.update();
     }

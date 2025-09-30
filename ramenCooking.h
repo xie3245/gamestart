@@ -11,15 +11,18 @@ class Renderer;
 class RamenCooking final {
     enum class RamenState {
         IDLE,
-        WAIT_POT,
         EMPTY,
         WATER_ADDED,
+        POT_IN_PLACE,
         WATER_BOILING,
+        NOODLES_CAPTURED,
         NOODLES_ADDED,
         COOKING,
         HALF_COOKED,
         COOKED,
-        BURNT
+        BURNT,
+        SERVING,
+        GOING_TO_TRASH
     };
 
 public:
@@ -27,10 +30,11 @@ public:
 
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
-    void show(const Renderer& rend) const noexcept;
+    void show(const Renderer& rend, float x, float y) const noexcept;
 
 private:
     ElementId m_elemId;
     RamenState m_state;
+    std::chrono::milliseconds m_start;
     const SoundTrack& boilingWaterTrack;
 };
