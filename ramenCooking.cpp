@@ -4,64 +4,122 @@
 #include "sound.h"
 #include "imageTexture.h"
 
-RamenCooking::RamenCooking(const SoundTrack& boil) noexcept
-    : m_state(RamenState::EMPTY)
-    , m_thread(Thread<int()>::fromMethod<RamenCooking, &RamenCooking::threadLoop>(this, "pot"))
-    , m_mtx()
-    , emptyPotTexture(getImage(ImageId::empty_pot))
-    , potWithWaterTexture(getImage(ImageId::pot_water_added))
-    , potWithBoilingWaterTexture(getImage(ImageId::pot_water_boiling))
-    , potWithRamenUncookedTexture(getImage(ImageId::pot_noodle_added))
-    , potWithRamenHalfCookedTexture(getImage(ImageId::pot_noodle_cooking))
-    , potWithRamenHalfCookedFlippedTexture(getImage(ImageId::pot_noodle_halfcooked))
-    , potWithRamenCookedTexture(getImage(ImageId::pot_noodle_cooked))
-    , potWithRamenBurntTexture(getImage(ImageId::pot_burnt))
+RamenCooking::RamenCooking(ElementId id, const SoundTrack& boil) noexcept
+    : m_elemId(id)
+    , m_state(RamenState::IDLE)
     , boilingWaterTrack(boil) {}
 
-RamenCooking::~RamenCooking() noexcept { m_thread.detach(); }
-
-void RamenCooking::show(const Renderer& rend) {
-    static uint16_t puffCnt = 0;
-    switch (m_state) {
-    case RamenState::EMPTY:
-        emptyPotTexture.show(rend, potFDst);
-        break;
-    case RamenState::WATER_ADDED:
-        potWithWaterTexture.show(rend, potFDst);
-        break;
-    case RamenState::WATER_BOILING: {
-        if (puffCnt < 60) {
-            ++puffCnt;
-        } else {
-            puffCnt = 0u;
-        }
-        if (puffCnt > 30u) {
-            potWithBoilingWaterTexture.show(rend, enlarge(potFDst));
-        } else {
-            potWithBoilingWaterTexture.show(rend, potFDst);
-        }
-    } break;
-    case RamenState::NOODLES_ADDED:
-        potWithRamenUncookedTexture.show(rend, potFDst);
-        break;
-    case RamenState::COOKING:
-        potWithRamenHalfCookedTexture.show(rend, potFDst);
-        break;
-    case RamenState::HALF_COOKED:
-        potWithRamenHalfCookedFlippedTexture.show(rend, potFDst);
-        break;
-    case RamenState::COOKED:
-        potWithRamenCookedTexture.show(rend, potFDst);
-        break;
-    case RamenState::BURNT:
-        potWithRamenBurntTexture.show(rend, potFDst);
-        break;
-    default:
-        break;
-    }
+void RamenCooking::handleClick(ElementId elemId) noexcept {
+    /*     switch (m_state) {
+        case RamenState::IDLE: {
+            if ((elemId == ElementId::potItem)) {
+                m_state = RamenState::WAIT_POT;
+            }
+        } break;
+        case RamenState::WAIT_POT: {
+            if (elemId == m_elemId) {
+            }
+        } break;
+        case RamenState::EMPTY: {
+            if ((elemId == ImageId::pot_water_added)) {
+                m_state = RamenState::WATER_ADDED;
+                start   = tick;
+            }
+        } break;
+        case RamenState::WATER_ADDED: {
+            if ((tick - start) > 2s) {
+                m_state = RamenState::WATER_BOILING;
+                start   = tick;
+            }
+        } break;
+        case RamenState::WATER_BOILING: {
+            if ((elemId == ImageId::ramenPkg)) {
+                m_state = RamenState::NOODLES_ADDED;
+                start   = tick;
+            }
+        } break;
+        case RamenState::NOODLES_ADDED: {
+            if ((tick - start) > 2s) {
+                m_state = RamenState::COOKING;
+                start   = tick;
+            }
+        } break;
+        case RamenState::COOKING: {
+            if ((tick - start) > 2s) {
+                m_state = RamenState::HALF_COOKED;
+                start   = tick;
+            }
+        } break;
+        case RamenState::HALF_COOKED: {
+            if ((tick - start) > 2s) {
+                m_state = RamenState::COOKED;
+                start   = tick;
+            }
+        } break;
+        case RamenState::COOKED: {
+            if ((tick - start) > 5s) {
+                m_state = RamenState::BURNT;
+            }
+            if ((elemId == ImageId::last)) {
+                m_state = RamenState::IDLE;
+                start   = tick;
+            }
+        } break;
+        case RamenState::BURNT: {
+            if ((elemId == ImageId::last)) {
+                m_state = RamenState::IDLE;
+                start   = tick;
+            }
+        } break;
+        default:
+            break;
+        } */
 }
 
-void RamenCooking::handleMouseDown(const SDL_Point& downPt) {
+void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept { using namespace std::chrono_literals; }
+
+void RamenCooking::show(const Renderer& rend) const noexcept {
+    /*     static uint16_t puffCnt = 0;
+        switch (m_state) {
+        case RamenState::EMPTY:
+            getImage(ImageId::empty_pot).show(rend, m_origFRect);
+            break;
+        case RamenState::WATER_ADDED:
+            getImage(ImageId::pot_water_added).show(rend, m_origFRect);
+            break;
+        case RamenState::WATER_BOILING: {
+            if (puffCnt < 60) {
+                ++puffCnt;
+            } else {
+                puffCnt = 0u;
+            }
+            if (puffCnt > 30u) {
+                getImage(ImageId::pot_water_boiling).show(rend, m_origFRect, 1.1f);
+            } else {
+                getImage(ImageId::pot_water_boiling).show(rend, m_origFRect);
+            }
+        } break;
+        case RamenState::NOODLES_ADDED:
+            getImage(ImageId::pot_noodle_added).show(rend, m_origFRect);
+            break;
+        case RamenState::COOKING:
+            getImage(ImageId::pot_noodle_cooking).show(rend, m_origFRect);
+            break;
+        case RamenState::HALF_COOKED:
+            getImage(ImageId::pot_noodle_halfcooked).show(rend, m_origFRect);
+            break;
+        case RamenState::COOKED:
+            getImage(ImageId::pot_noodle_cooked).show(rend, m_origFRect);
+            break;
+        case RamenState::BURNT:
+            getImage(ImageId::pot_burnt).show(rend, m_origFRect);
+            break;
+        default:
+            break;
+        } */
+}
+
+/* void RamenCooking::handleMouseDown(const SDL_Point& downPt) {
     LockGuard lock{m_mtx};
     switch (m_state) {
     case RamenState::EMPTY: {
@@ -134,4 +192,4 @@ int RamenCooking::threadLoop() {
         }
     }
     return 0;
-}
+} */

@@ -1,36 +1,36 @@
 #pragma once
 
-#include "thread.h"
-#include "mutex.h"
+#include <chrono>
+#include "imageId.h"
+#include <SDL3/SDL.h>
+#include "elementId.h"
 
 class SoundTrack;
 class ImageTexture;
-struct SDL_Point;
 class Renderer;
 class RamenCooking final {
-    enum class RamenState { EMPTY, WATER_ADDED, WATER_BOILING, NOODLES_ADDED, COOKING, HALF_COOKED, COOKED, BURNT };
+    enum class RamenState {
+        IDLE,
+        WAIT_POT,
+        EMPTY,
+        WATER_ADDED,
+        WATER_BOILING,
+        NOODLES_ADDED,
+        COOKING,
+        HALF_COOKED,
+        COOKED,
+        BURNT
+    };
 
 public:
-    explicit RamenCooking(const SoundTrack& boil) noexcept;
-    ~RamenCooking() noexcept;
+    RamenCooking(ElementId id, const SoundTrack& boil) noexcept;
 
-    void show(const Renderer& rend);
-
-    void handleMouseDown(const SDL_Point& downPt);
+    void handleClick(ElementId elemId) noexcept;
+    void handleTick(std::chrono::milliseconds tick) noexcept;
+    void show(const Renderer& rend) const noexcept;
 
 private:
-    int threadLoop();
+    ElementId m_elemId;
     RamenState m_state;
-    uint8_t m_progress = 0;
-    Thread<int()> m_thread;
-    Mutex m_mtx;
-    const ImageTexture& emptyPotTexture;
-    const ImageTexture& potWithWaterTexture;
-    const ImageTexture& potWithBoilingWaterTexture;
-    const ImageTexture& potWithRamenUncookedTexture;
-    const ImageTexture& potWithRamenHalfCookedTexture;
-    const ImageTexture& potWithRamenHalfCookedFlippedTexture;
-    const ImageTexture& potWithRamenCookedTexture;
-    const ImageTexture& potWithRamenBurntTexture;
     const SoundTrack& boilingWaterTrack;
 };

@@ -2,53 +2,44 @@
 #include <SDL3/SDL.h>
 #include "imageTexture.h"
 #include "delegate.h"
-#include <algorithm>
-#include <cmath>
-#include <limits>
-
-inline constexpr SDL_FRect to_frect(const SDL_Rect& r) noexcept {
-    return SDL_FRect{static_cast<float>(r.x), static_cast<float>(r.y), static_cast<float>(r.w),
-                     static_cast<float>(r.h)};
-}
-
-inline SDL_Rect frect_round(const SDL_FRect& r) noexcept {
-    auto lr = [](float v) { return static_cast<int>(std::lround(v)); };
-    return SDL_Rect{lr(r.x), lr(r.y), std::max(0, lr(r.w)), std::max(0, lr(r.h))};
-}
+#include "elementId.h"
 
 struct Element;
-using updateFunc = Delegate<void(Element& elem, const SDL_Point& mouse, uint32_t type)>;
+using updateFunc = Delegate<void(Element&, const SDL_FPoint&, uint32_t, ImageId)>;
 
-enum class Interaction { undefined, hover, down, click };
+enum class Interaction { none, hover, down, click };
 
 struct Element {
-    Element(SDL_Rect rect, ImageId imId, updateFunc&& func, bool defaultVisible = true)
+    Element(SDL_Rect rect, ElementId id, ImageId imId, bool hover, bool defaultVisible = true)
         : pos(rect)
         , fpos(to_frect(pos))
         , angle(0.0)
-        , id(imId)
-        , act(Interaction::undefined)
+        , imgId(imId)
+        , act(Interaction::none)
         , visible(defaultVisible)
-        , update(std::move(func)) {}
+        , hoverable(hover)
+        , elemId(id) {}
 
-    Element(SDL_FRect rect, ImageId imId, updateFunc&& func, bool defaultVisible = true)
+    Element(SDL_FRect rect, ElementId id, ImageId imId, bool hover, bool defaultVisible = true)
         : pos(frect_round(rect))
         , fpos(rect)
         , angle(0.0)
-        , id(imId)
-        , act(Interaction::undefined)
+        , imgId(imId)
+        , act(Interaction::none)
         , visible(defaultVisible)
-        , update(std::move(func)) {}
+        , hoverable(hover)
+        , elemId(id) {}
 
     SDL_Rect pos;
     SDL_FRect fpos;
     float ratio = 1.f;
     double angle;
-    ImageId id;
+    ImageId imgId;
     Interaction act;
     bool visible = true;
-    updateFunc update;
+    bool hoverable;
+    ElementId elemId;
 };
 
-void updateSideBarFixItem(Element& elem, const SDL_Point& mouse, uint32_t type) noexcept;
-void updateCookingItem(Element& elem, const SDL_Point& mouse, uint32_t type) noexcept;
+void updateSideBarFixItem(Element& elem, const SDL_FPoint& mouse, uint32_t type, ImageId sl) noexcept;
+void updateCookingItem(Element& elem, const SDL_FPoint& mouse, uint32_t type, ImageId sl) noexcept;
