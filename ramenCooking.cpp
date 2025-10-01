@@ -4,11 +4,11 @@
 #include "sound.h"
 #include "imageTexture.h"
 
-RamenCooking::RamenCooking(ElementId id, const SoundTrack& boil) noexcept
+RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx) noexcept
     : m_elemId(id)
     , m_frect(getCookingSlotFRect(id))
     , m_state(RamenState::IDLE)
-    , boilingWaterTrack(boil) {}
+    , m_mixer(mx) {}
 
 void RamenCooking::handleClick(ElementId elemId) noexcept {
     switch (m_state) {
@@ -85,7 +85,7 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
         if ((tick - m_stateStart) > 2s) {
             m_state          = RamenState::WATER_BOILING;
             m_showStateStart = tick;
-            boilingWaterTrack.playOnce();
+            m_mixer.play(SoundId::water_boiling, 1);
             m_stateStart = tick;
         }
     } break;

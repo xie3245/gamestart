@@ -5,7 +5,7 @@
 #include <SDL3/SDL.h>
 #include "elementId.h"
 
-class SoundTrack;
+class AudioMixer;
 class ImageTexture;
 class Renderer;
 class RamenCooking final {
@@ -26,7 +26,7 @@ class RamenCooking final {
     };
 
 public:
-    RamenCooking(ElementId id, const SoundTrack& boil) noexcept;
+    RamenCooking(ElementId id, const AudioMixer& mx) noexcept;
 
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
@@ -40,5 +40,5 @@ private:
     bool m_amplify = false;
     std::chrono::milliseconds m_stateStart;
     std::chrono::milliseconds m_showStateStart;
-    const SoundTrack& boilingWaterTrack;
+    const AudioMixer& m_mixer;
 };
