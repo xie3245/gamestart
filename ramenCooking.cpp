@@ -78,6 +78,18 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
     }
 }
 
+void RamenCooking::toggleAmplify(std::chrono::milliseconds tick) noexcept {
+    using namespace std::chrono_literals;
+    if ((tick - m_showStateStart) > 500ms) {
+        if (m_amplify) {
+            m_amplify = false;
+        } else {
+            m_amplify = true;
+        }
+        m_showStateStart = tick;
+    }
+}
+
 void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
     using namespace std::chrono_literals;
     switch (m_state) {
@@ -85,40 +97,35 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
         if ((tick - m_stateStart) > 2s) {
             m_state          = RamenState::WATER_BOILING;
             m_showStateStart = tick;
-            m_mixer.play(SoundId::water_boiling, 1);
+            m_mixer.play(SoundId::water_boiling);
             m_stateStart = tick;
         }
     } break;
     case RamenState::WATER_BOILING: {
-        if ((tick - m_showStateStart) > 500ms) {
-            if (m_amplify) {
-                m_amplify = false;
-            } else {
-                m_amplify = true;
-            }
-            m_showStateStart = tick;
-        }
+        toggleAmplify(tick);
         m_stateStart = tick;
     } break;
     case RamenState::NOODLES_ADDED: {
-        if ((tick - m_stateStart) > 5s) {
+        if ((tick - m_stateStart) > 3s) {
             m_state      = RamenState::COOKING;
             m_stateStart = tick;
         }
     } break;
     case RamenState::COOKING: {
-        if ((tick - m_stateStart) > 3s) {
+        toggleAmplify(tick);
+        if ((tick - m_stateStart) > 5s) {
             m_state = RamenState::BURNT;
         }
     } break;
     case RamenState::HALF_COOKED: {
-        if ((tick - m_stateStart) > 5s) {
+        if ((tick - m_stateStart) > 3s) {
             m_state      = RamenState::COOKED;
             m_stateStart = tick;
         }
     } break;
     case RamenState::COOKED: {
-        if ((tick - m_stateStart) > 3s) {
+        toggleAmplify(tick);
+        if ((tick - m_stateStart) > 5s) {
             m_state = RamenState::BURNT;
         }
     } break;
@@ -159,13 +166,13 @@ void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
         getImage(ImageId::pot_noodle_added).show(rend, m_frect);
         break;
     case RamenState::COOKING:
-        getImage(ImageId::pot_noodle_cooking).show(rend, m_frect);
+        showPulsingZoom(rend, ImageId::pot_noodle_cooking);
         break;
     case RamenState::HALF_COOKED:
         getImage(ImageId::pot_noodle_halfcooked).show(rend, m_frect);
         break;
     case RamenState::COOKED:
-        getImage(ImageId::pot_noodle_cooked).show(rend, m_frect);
+        showPulsingZoom(rend, ImageId::pot_noodle_cooked);
         break;
     case RamenState::BURNT:
         getImage(ImageId::pot_burnt).show(rend, m_frect);

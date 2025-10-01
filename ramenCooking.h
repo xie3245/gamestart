@@ -34,6 +34,7 @@ public:
 
 private:
     void showPulsingZoom(const Renderer& rend, ImageId id) const noexcept;
+    void toggleAmplify(std::chrono::milliseconds tick) noexcept;
     ElementId m_elemId;
     SDL_FRect m_frect;
     RamenState m_state;
