@@ -34,6 +34,7 @@ public:
 
 private:
     ElementId m_elemId;
+    SDL_FRect m_frect;
     RamenState m_state;
     std::chrono::milliseconds m_start;
     const SoundTrack& boilingWaterTrack;

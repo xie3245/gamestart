@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include "elementId.h"
 
 enum class MoveType { undefined, move, click };
 
@@ -19,8 +20,6 @@ inline SDL_Rect frect_round(const SDL_FRect& r) noexcept {
 }
 
 bool isMouse(const SDL_Event& e) noexcept;
-
-SDL_FRect enlarge(const SDL_FRect& orig, float ratio = 1.2f) noexcept;
 
 constexpr int SCREEN_WIDTH  = 800;
 constexpr int SCREEN_HEIGHT = 600;
@@ -46,39 +45,43 @@ constexpr float columnFourthItemY = columnFirstY - 3 * (columnItemSize + columnI
 constexpr float columnFifthItemY  = columnFirstY - 4 * (columnItemSize + columnItemDis);
 
 constexpr SDL_FRect pkgFRect = {columnX, columnFirstY, columnItemSize, columnItemSize};
-constexpr SDL_Rect pkgRect{static_cast<int>(columnX), static_cast<int>(columnFirstY), static_cast<int>(columnItemSize),
-                           static_cast<int>(columnItemSize)};
 
 constexpr SDL_FRect sinkFRect = {columnX, columnSecondItemY, columnItemSize, columnItemSize};
-constexpr SDL_Rect sinkRect   = {static_cast<int>(columnX), static_cast<int>(columnSecondItemY),
-                                 static_cast<int>(columnItemSize), static_cast<int>(columnItemSize)};
 
 constexpr SDL_FRect binFRect = {columnX, columnThirdItemY, columnItemSize, columnItemSize};
-constexpr SDL_Rect binRect   = {static_cast<int>(columnX), static_cast<int>(columnThirdItemY),
-                                static_cast<int>(columnItemSize), static_cast<int>(columnItemSize)};
 
 constexpr SDL_FRect bowlsFRect = {columnX, columnFourthItemY, columnItemSize, columnItemSize};
-constexpr SDL_Rect bowlsRect   = {static_cast<int>(columnX), static_cast<int>(columnFourthItemY),
-                                  static_cast<int>(columnItemSize), static_cast<int>(columnItemSize)};
 
 constexpr SDL_FRect potToolFRect = {columnX, columnFifthItemY, columnItemSize, columnItemSize};
-constexpr SDL_Rect potToolRect   = {static_cast<int>(columnX), static_cast<int>(columnFifthItemY),
-                                    static_cast<int>(columnItemSize), static_cast<int>(columnItemSize)};
 
 constexpr float burnerX       = SCREEN_WIDTH * 0.3f;
 constexpr float burnerY       = SCREEN_HEIGHT * 0.6f;
 constexpr float burnerSize    = 250.f;
 constexpr SDL_FRect burnerDst = {burnerX, burnerY, burnerSize, burnerSize};
 
-constexpr SDL_FRect potFDst = {burnerX + burnerSize * 0.12f, burnerY - burnerSize * 0.1f, 128, 128};
-constexpr SDL_FRect potDst1 = {static_cast<int>(burnerX + burnerSize * 0.12f),
-                               static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
+constexpr SDL_FRect potFDst1 = {static_cast<int>(burnerX + burnerSize * 0.12f),
+                                static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
 
-constexpr SDL_FRect potDst2 = {static_cast<int>(burnerX + burnerSize * 0.47f),
-                               static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
+constexpr SDL_FRect potFDst2 = {static_cast<int>(burnerX + burnerSize * 0.47f),
+                                static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
 
-constexpr SDL_FRect potDst3 = {static_cast<int>(burnerX + burnerSize * 0.06f),
-                               static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
+constexpr SDL_FRect potFDst3 = {static_cast<int>(burnerX + burnerSize * 0.06f),
+                                static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
 
-constexpr SDL_FRect potDst4 = {static_cast<int>(burnerX + burnerSize * 0.42f),
-                               static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
+constexpr SDL_FRect potFDst4 = {static_cast<int>(burnerX + burnerSize * 0.42f),
+                                static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
+
+constexpr SDL_FRect getCookingSlotFRect(ElementId id) {
+    switch (id) {
+    case ElementId::cookingSlot1:
+        return potFDst1;
+    case ElementId::cookingSlot2:
+        return potFDst2;
+    case ElementId::cookingSlot3:
+        return potFDst3;
+    case ElementId::cookingSlot4:
+        return potFDst4;
+    default:
+        return {0, 0, 0, 0};
+    }
+}

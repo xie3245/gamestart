@@ -10,16 +10,16 @@
 #include "element.h"
 #include <algorithm>
 
-Element all[] = {{potToolRect, ElementId::potSideBar, ImageId::empty_pot, true},
-                 {pkgRect, ElementId::ramenSideBar, ImageId::ramenPkg, true},
-                 {sinkRect, ElementId::sinkSideBar, ImageId::sink, true},
-                 {binRect, ElementId::binSideBar, ImageId::bin, true},
-                 {bowlsRect, ElementId::bowlsSideBar, ImageId::bowls, true},
-                 {bowlsRect, ElementId::bowlsItem, ImageId::empty_bowl, false, false},
-                 {potDst1, ElementId::cookingSlot1, ImageId::empty_pot, false, false},
-                 {potDst2, ElementId::cookingSlot2, ImageId::empty_pot, false, false},
-                 {potDst3, ElementId::cookingSlot3, ImageId::empty_pot, false, false},
-                 {potDst4, ElementId::cookingSlot4, ImageId::empty_pot, false, false}};
+Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true},
+                 {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true},
+                 {sinkFRect, ElementId::sinkSideBar, ImageId::sink, true},
+                 {binFRect, ElementId::binSideBar, ImageId::bin, true},
+                 {bowlsFRect, ElementId::bowlsSideBar, ImageId::bowls, true},
+                 {bowlsFRect, ElementId::bowlsItem, ImageId::empty_bowl, false, false},
+                 {potFDst1, ElementId::cookingSlot1, ImageId::empty_pot, false, false},
+                 {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot, false, false},
+                 {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot, false, false},
+                 {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot, false, false}};
 
 class SideBar final {
 public:

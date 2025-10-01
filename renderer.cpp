@@ -34,6 +34,11 @@ SDL_Texture* Renderer::loadTexture(SDL_Surface* surf) const {
     return tex;
 }
 
+static SDL_FRect enlarge(const SDL_FRect& orig, float ratio) noexcept {
+    return {orig.x - orig.w * (ratio - 1.f) * 0.5f, orig.y - orig.h * (ratio - 1.f) * 0.5f, orig.w * ratio,
+            orig.h * ratio};
+}
+
 void Renderer::renderTexture(SDL_Texture* tex, const SDL_FRect& rect, float ratio, double angle) const {
     auto rec = enlarge(rect, ratio);
     if (!SDL_RenderTextureRotated(m_renderer, tex, nullptr, &rec, angle, nullptr, SDL_FLIP_NONE)) {
