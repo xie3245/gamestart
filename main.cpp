@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
     }
 
     Renderer renderer{};
-    AudioMixer mx{};
+    static AudioMixer mx{};
     mx.play(SoundId::bgm, -1, 0.3f);
 
     // Load textures
