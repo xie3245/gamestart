@@ -38,7 +38,8 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
     } break;
     case RamenState::NOODLES_CAPTURED: {
         if ((elemId == m_elemId)) {
-            m_state = RamenState::NOODLES_ADDED;
+            m_state   = RamenState::NOODLES_ADDED;
+            m_amplify = false;
         } else {
             m_state = RamenState::WATER_BOILING;
         }
@@ -81,50 +82,57 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
     using namespace std::chrono_literals;
     switch (m_state) {
     case RamenState::POT_IN_PLACE: {
-        if ((tick - m_start) > 2s) {
-            m_state = RamenState::WATER_BOILING;
+        if ((tick - m_stateStart) > 2s) {
+            m_state          = RamenState::WATER_BOILING;
+            m_showStateStart = tick;
             boilingWaterTrack.playOnce();
+            m_stateStart = tick;
         }
     } break;
+    case RamenState::WATER_BOILING: {
+        if ((tick - m_showStateStart) > 500ms) {
+            if (m_amplify) {
+                m_amplify = false;
+            } else {
+                m_amplify = true;
+            }
+            m_showStateStart = tick;
+        }
+        m_stateStart = tick;
+    } break;
     case RamenState::NOODLES_ADDED: {
-        if ((tick - m_start) > 5s) {
-            m_state = RamenState::COOKING;
-            m_start = tick;
+        if ((tick - m_stateStart) > 5s) {
+            m_state      = RamenState::COOKING;
+            m_stateStart = tick;
         }
     } break;
     case RamenState::COOKING: {
-        if ((tick - m_start) > 3s) {
+        if ((tick - m_stateStart) > 3s) {
             m_state = RamenState::BURNT;
         }
     } break;
     case RamenState::HALF_COOKED: {
-        if ((tick - m_start) > 5s) {
-            m_state = RamenState::COOKED;
-            m_start = tick;
+        if ((tick - m_stateStart) > 5s) {
+            m_state      = RamenState::COOKED;
+            m_stateStart = tick;
         }
     } break;
     case RamenState::COOKED: {
-        if ((tick - m_start) > 3s) {
+        if ((tick - m_stateStart) > 3s) {
             m_state = RamenState::BURNT;
         }
     } break;
     default:
-        m_start = tick;
+        m_stateStart = tick;
         break;
     }
 }
 
-void showBoiling(const Renderer& rend, const SDL_FRect& frect) noexcept {
-    static uint16_t puffCnt = 0;
-    if (puffCnt < 60) {
-        ++puffCnt;
+void RamenCooking::showPulsingZoom(const Renderer& rend, ImageId id) const noexcept {
+    if (m_amplify) {
+        getImage(id).show(rend, m_frect, 1.1f);
     } else {
-        puffCnt = 0u;
-    }
-    if (puffCnt > 30u) {
-        getImage(ImageId::pot_water_boiling).show(rend, frect, 1.1f);
-    } else {
-        getImage(ImageId::pot_water_boiling).show(rend, frect);
+        getImage(id).show(rend, m_frect);
     }
 }
 
@@ -141,10 +149,10 @@ void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
         getImage(ImageId::pot_water_added).show(rend, m_frect);
         break;
     case RamenState::WATER_BOILING: {
-        showBoiling(rend, m_frect);
+        showPulsingZoom(rend, ImageId::pot_water_boiling);
     } break;
     case RamenState::NOODLES_CAPTURED: {
-        showBoiling(rend, m_frect);
+        showPulsingZoom(rend, ImageId::pot_water_boiling);
         getImage(ImageId::ramenPkg).show(rend, {x - pkgFRect.w * 0.5f, y - pkgFRect.h * 0.5f, pkgFRect.w, pkgFRect.h});
     } break;
     case RamenState::NOODLES_ADDED:

@@ -33,9 +33,12 @@ public:
     void show(const Renderer& rend, float x, float y) const noexcept;
 
 private:
+    void showPulsingZoom(const Renderer& rend, ImageId id) const noexcept;
     ElementId m_elemId;
     SDL_FRect m_frect;
     RamenState m_state;
-    std::chrono::milliseconds m_start;
+    bool m_amplify = false;
+    std::chrono::milliseconds m_stateStart;
+    std::chrono::milliseconds m_showStateStart;
     const SoundTrack& boilingWaterTrack;
 };

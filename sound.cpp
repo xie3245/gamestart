@@ -33,7 +33,7 @@ SoundTrack::~SoundTrack() noexcept {
 }
 
 void SoundTrack::playOnce() const noexcept {
-    if (!SDL_SetNumberProperty(m_props, MIX_PROP_PLAY_LOOPS_NUMBER, 1) || !MIX_PlayTrack(m_track, m_props)) {
+    if (!MIX_PlayTrack(m_track, m_props)) {
         std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
     }
 }
