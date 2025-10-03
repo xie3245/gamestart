@@ -3,12 +3,14 @@
 #include "utils.h"
 #include "sound.h"
 #include "imageTexture.h"
+#include "cookingStat.h"
 
-RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx) noexcept
+RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx, CookingStatus& stat) noexcept
     : m_elemId(id)
     , m_frect(getCookingSlotFRect(id))
     , m_state(RamenState::IDLE)
-    , m_mixer(mx) {}
+    , m_mixer(mx)
+    , m_stat(stat) {}
 
 void RamenCooking::handleClick(ElementId elemId) noexcept {
     switch (m_state) {
@@ -62,6 +64,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
     case RamenState::SERVING: {
         if (elemId == ElementId::bowlsSideBar) {
             m_state = RamenState::IDLE;
+            m_stat.updateCooked(m_elemId, false);
         } else {
             m_state = RamenState::COOKED;
         }
@@ -119,6 +122,7 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
     } break;
     case RamenState::HALF_COOKED: {
         if ((tick - m_stateStart) > 3s) {
+            m_stat.updateCooked(m_elemId, true);
             m_state      = RamenState::COOKED;
             m_stateStart = tick;
         }
@@ -126,6 +130,7 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
     case RamenState::COOKED: {
         toggleAmplify(tick);
         if ((tick - m_stateStart) > 5s) {
+            m_stat.updateCooked(m_elemId, false);
             m_state = RamenState::BURNT;
         }
     } break;

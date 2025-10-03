@@ -8,6 +8,7 @@
 class AudioMixer;
 class ImageTexture;
 class Renderer;
+class CookingStatus;
 class RamenCooking final {
     enum class RamenState {
         IDLE,
@@ -26,7 +27,7 @@ class RamenCooking final {
     };
 
 public:
-    RamenCooking(ElementId id, const AudioMixer& mx) noexcept;
+    RamenCooking(ElementId id, const AudioMixer& mx, CookingStatus& stat) noexcept;
 
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
@@ -42,4 +43,5 @@ private:
     std::chrono::milliseconds m_stateStart;
     std::chrono::milliseconds m_showStateStart;
     const AudioMixer& m_mixer;
+    CookingStatus& m_stat;
 };

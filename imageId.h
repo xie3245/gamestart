@@ -20,5 +20,7 @@ enum class ImageId {
     pot_noodle_cooked,
     pot_burnt,
     customer,
+    customer_chew1,
+    customer_chew2,
     last
 };

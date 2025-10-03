@@ -13,5 +13,8 @@ enum class ElementId {
     cookingSlot1,
     cookingSlot2,
     cookingSlot3,
-    cookingSlot4
+    cookingSlot4,
+    customer1
 };
+
+constexpr bool is_customer(ElementId id) noexcept { return id == ElementId::customer1; }
