@@ -41,7 +41,7 @@ static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
                                   {"assets/cus_hippo1.png"},
                                   {"assets/cus_hippo4.png"},
                                   {"assets/cus_hippo5.png"},
-                                  {"assets/cus_hippo2.png"}};
+                                  {"assets/cus_hippo7.png"}};
 
 const ImageTexture& getImage(ImageId id) {
     if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last)) {

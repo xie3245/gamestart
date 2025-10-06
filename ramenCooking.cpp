@@ -72,8 +72,6 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         if (is_customer(elemId)) {
             m_state = RamenState::IDLE;
             m_stat.updateCooked(m_elemId, false);
-        } else {
-            m_state = RamenState::COOKED;
         }
     } break;
     case RamenState::GOING_TO_TRASH: {
