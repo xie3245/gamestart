@@ -23,12 +23,12 @@ class RamenCooking final {
         COOKED,
         BURNT,
         SERVING,
+        GOING_TO_CUSTOMER,
         GOING_TO_TRASH
     };
 
 public:
     RamenCooking(ElementId id, const AudioMixer& mx, CookingStatus& stat) noexcept;
-
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
     void show(const Renderer& rend, float x, float y) const noexcept;

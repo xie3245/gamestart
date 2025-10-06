@@ -12,17 +12,16 @@
 #include "customer.h"
 #include <algorithm>
 
-Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true},
-                 {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true},
-                 {sinkFRect, ElementId::sinkSideBar, ImageId::sink, true},
-                 {binFRect, ElementId::binSideBar, ImageId::bin, true},
-                 {bowlsFRect, ElementId::bowlsSideBar, ImageId::bowls, true},
-                 {bowlsFRect, ElementId::bowlsItem, ImageId::empty_bowl, false, false},
-                 {potFDst1, ElementId::cookingSlot1, ImageId::empty_pot, false, false},
-                 {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot, false, false},
-                 {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot, false, false},
-                 {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot, false, false},
-                 {custFRect, ElementId::customer1, ImageId::customer, false}};
+Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true, true},
+                 {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true, true},
+                 {sinkFRect, ElementId::sinkSideBar, ImageId::sink, true, true},
+                 {binFRect, ElementId::binSideBar, ImageId::bin, true, true},
+                 {bowlsFRect, ElementId::bowlsSideBar, ImageId::bowls, true, true},
+                 {potFDst1, ElementId::cookingSlot1, ImageId::empty_pot},
+                 {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot},
+                 {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot},
+                 {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot},
+                 {custFRect, ElementId::customer1, ImageId::customer}};
 
 class SideBar final {
 public:
@@ -129,7 +128,7 @@ int main(int argc, char* argv[]) {
         RamenCooking{ElementId::cookingSlot1, mx, ramenStat}, RamenCooking{ElementId::cookingSlot2, mx, ramenStat},
         RamenCooking{ElementId::cookingSlot3, mx, ramenStat}, RamenCooking{ElementId::cookingSlot4, mx, ramenStat}};
     SideBar sideBar{mx};
-    Customers customers{ramenStat};
+    Customers customers{mx, ramenStat};
     SDL_Event e;
     while (!quit) {
         SDL_FPoint mousePoint;
@@ -171,6 +170,7 @@ int main(int argc, char* argv[]) {
         customers.show(renderer);
 
         counterTexture.show(renderer, counterRect);
+        customers.showServedItems(renderer);
         burnerTexture.show(renderer, burnerDst);
 
         // Draw ramen package, sink

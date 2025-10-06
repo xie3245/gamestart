@@ -59,17 +59,21 @@ constexpr float burnerY       = SCREEN_HEIGHT * 0.6f;
 constexpr float burnerSize    = 250.f;
 constexpr SDL_FRect burnerDst = {burnerX, burnerY, burnerSize, burnerSize};
 
-constexpr SDL_FRect potFDst1 = {static_cast<int>(burnerX + burnerSize * 0.12f),
-                                static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
+constexpr SDL_FRect potFDst1 = {burnerX + burnerSize * 0.12f, burnerY - burnerSize * 0.08f, 128, 128};
 
-constexpr SDL_FRect potFDst2 = {static_cast<int>(burnerX + burnerSize * 0.47f),
-                                static_cast<int>(burnerY - burnerSize * 0.08f), 128, 128};
+constexpr SDL_FRect potFDst2 = {burnerX + burnerSize * 0.47f, burnerY - burnerSize * 0.08f, 128, 128};
 
-constexpr SDL_FRect potFDst3 = {static_cast<int>(burnerX + burnerSize * 0.06f),
-                                static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
+constexpr SDL_FRect potFDst3 = {burnerX + burnerSize * 0.06f, burnerY + burnerSize * 0.16f, 128, 128};
 
-constexpr SDL_FRect potFDst4 = {static_cast<int>(burnerX + burnerSize * 0.42f),
-                                static_cast<int>(burnerY + burnerSize * 0.16f), 128, 128};
+constexpr SDL_FRect potFDst4 = {burnerX + burnerSize * 0.42f, burnerY + burnerSize * 0.16f, 128, 128};
+
+constexpr SDL_FRect servingSlotFDst1 = {custFRect.x + cusSize * 0.3f, custFRect.y + cusSize * 0.5f, 80, 80};
+
+constexpr SDL_FRect servingSlotFDst2 = {custFRect.x + 100, counterHeight, 80, 80};
+
+constexpr SDL_FRect servingSlotFDst3 = {custFRect.x + 200, counterHeight, 80, 80};
+
+constexpr SDL_FRect servingSlotFDst4 = {custFRect.x + 300, counterHeight, 80, 80};
 
 constexpr SDL_FRect getCookingSlotFRect(ElementId id) {
     switch (id) {

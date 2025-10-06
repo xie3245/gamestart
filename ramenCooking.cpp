@@ -52,7 +52,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::COOKED: {
-        if (elemId == m_elemId) {
+        if (elemId == ElementId::bowlsSideBar) {
             m_state = RamenState::SERVING;
         }
     } break;
@@ -62,7 +62,14 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::SERVING: {
-        if (elemId == ElementId::bowlsSideBar) {
+        if (elemId == m_elemId) {
+            m_state = RamenState::GOING_TO_CUSTOMER;
+        } else {
+            m_state = RamenState::COOKED;
+        }
+    } break;
+    case RamenState::GOING_TO_CUSTOMER: {
+        if (is_customer(elemId)) {
             m_state = RamenState::IDLE;
             m_stat.updateCooked(m_elemId, false);
         } else {
@@ -84,11 +91,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
 void RamenCooking::toggleAmplify(std::chrono::milliseconds tick) noexcept {
     using namespace std::chrono_literals;
     if ((tick - m_showStateStart) > 500ms) {
-        if (m_amplify) {
-            m_amplify = false;
-        } else {
-            m_amplify = true;
-        }
+        m_amplify        = !m_amplify;
         m_showStateStart = tick;
     }
 }
@@ -114,7 +117,8 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
             m_stateStart = tick;
         }
     } break;
-    case RamenState::COOKING: {
+    case RamenState::COOKING:
+    case RamenState::SERVING: {
         toggleAmplify(tick);
         if ((tick - m_stateStart) > 5s) {
             m_state = RamenState::BURNT;
@@ -183,11 +187,16 @@ void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
         getImage(ImageId::pot_burnt).show(rend, m_frect);
         break;
     case RamenState::SERVING:
-        getImage(ImageId::pot_noodle_cooked)
-            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
+        showPulsingZoom(rend, ImageId::pot_noodle_cooked);
+        getImage(ImageId::empty_bowl)
+            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h}, 0.8f);
         break;
     case RamenState::GOING_TO_TRASH:
         getImage(ImageId::pot_burnt).show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
+        break;
+    case RamenState::GOING_TO_CUSTOMER:
+        getImage(ImageId::bowl_with_ramen_plain)
+            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
         break;
     default:
         break;

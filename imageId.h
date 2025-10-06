@@ -7,6 +7,7 @@ enum class ImageId {
     ramenPkg,
     bowls,
     empty_bowl,
+    bowl_with_ramen_plain,
     bin,
     bin_open,
     counter_surface,
@@ -22,5 +23,6 @@ enum class ImageId {
     customer,
     customer_chew1,
     customer_chew2,
+    customer_served_well,
     last
 };

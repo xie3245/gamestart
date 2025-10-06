@@ -15,7 +15,6 @@ public:
             return cooked4;
         default:
             return false;
-            break;
         }
     }
 

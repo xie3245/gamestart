@@ -35,10 +35,10 @@ AudioMixer::~AudioMixer() noexcept {
 
 void AudioMixer::play(SoundId id, int repetition, float gain_ratio) const noexcept {
     using namespace std::chrono_literals;
-    static SoundTrack allSoundTracks[] = {{MIX_CreateTrack(m_mixer), SoundId::bgm, 5s},
-                                          {MIX_CreateTrack(m_mixer), SoundId::water_boiling},
-                                          {MIX_CreateTrack(m_mixer), SoundId::running_water},
-                                          {MIX_CreateTrack(m_mixer), SoundId::bin_open}};
+    static SoundTrack allSoundTracks[] = {
+        {MIX_CreateTrack(m_mixer), SoundId::bgm, 5s},       {MIX_CreateTrack(m_mixer), SoundId::water_boiling},
+        {MIX_CreateTrack(m_mixer), SoundId::running_water}, {MIX_CreateTrack(m_mixer), SoundId::bin_open},
+        {MIX_CreateTrack(m_mixer), SoundId::slurp},         {MIX_CreateTrack(m_mixer), SoundId::burp}};
 
     SoundTrack& track = allSoundTracks[static_cast<size_t>(id)];
     track.scaleVolume(gain_ratio);
@@ -51,7 +51,9 @@ MIX_Audio* getAudio(SoundId id) noexcept {
         {MIX_LoadAudio(nullptr, "assets/sounds/bgm.mp3", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/boiling_water.mp3", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/sink_running_water.wav", false), MIX_DestroyAudio},
-        {MIX_LoadAudio(nullptr, "assets/sounds/bin_open_sound.ogg", false), MIX_DestroyAudio}};
+        {MIX_LoadAudio(nullptr, "assets/sounds/bin_open_sound.ogg", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/slurp.wav", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/burp.wav", false), MIX_DestroyAudio}};
     return allAudios[static_cast<size_t>(id)].get();
 }
 

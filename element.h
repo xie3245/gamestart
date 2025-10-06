@@ -10,7 +10,7 @@ using updateFunc = Delegate<void(Element&, const SDL_FPoint&, uint32_t, ImageId)
 enum class Interaction { none, hover, down, click };
 
 struct Element {
-    Element(SDL_FRect rect, ElementId id, ImageId imId, bool hover, bool defaultVisible = true)
+    Element(SDL_FRect rect, ElementId id, ImageId imId, bool hover = false, bool defaultVisible = false)
         : fpos(rect)
         , angle(0.0)
         , imgId(imId)
@@ -22,7 +22,7 @@ struct Element {
     float ratio = 1.f;
     double angle;
     ImageId imgId;
-    bool visible = true;
+    bool visible = false;
     bool hoverable;
     ElementId elemId;
 };

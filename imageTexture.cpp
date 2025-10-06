@@ -25,6 +25,7 @@ static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
                                   {"assets/ramen_pkg.png"},
                                   {"assets/bowls.png"},
                                   {"assets/empty_bowl.png"},
+                                  {"assets/bowl_with_ramen_cooked3.png"},
                                   {"assets/trash_bin_closed.png"},
                                   {"assets/trash_bin_open.png"},
                                   {"assets/counter_surface_lean.png"},
@@ -39,7 +40,8 @@ static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
                                   {"assets/pot_with_ramen_burnt.png"},
                                   {"assets/cus_hippo1.png"},
                                   {"assets/cus_hippo4.png"},
-                                  {"assets/cus_hippo5.png"}};
+                                  {"assets/cus_hippo5.png"},
+                                  {"assets/cus_hippo2.png"}};
 
 const ImageTexture& getImage(ImageId id) {
     if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last)) {
