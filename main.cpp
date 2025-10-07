@@ -8,7 +8,6 @@
 #include "sound.h"
 #include "imageTexture.h"
 #include "element.h"
-#include "cookingStat.h"
 #include "customer.h"
 #include <algorithm>
 
@@ -21,7 +20,10 @@ Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true,
                  {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot},
                  {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot},
                  {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot},
-                 {custFRect, ElementId::customer1, ImageId::customer}};
+                 {cust1FRect, ElementId::customer1, ImageId::customer},
+                 {cust2FRect, ElementId::customer2, ImageId::customer},
+                 {cust3FRect, ElementId::customer3, ImageId::customer},
+                 {cust4FRect, ElementId::customerRightMost, ImageId::customer}};
 
 class SideBar final {
 public:
@@ -123,12 +125,14 @@ int main(int argc, char* argv[]) {
     const ImageTexture& customerTexture = getImage(ImageId::customer);
 
     bool quit = false;
-    CookingStatus ramenStat{};
-    RamenCooking slots[]{
-        RamenCooking{ElementId::cookingSlot1, mx, ramenStat}, RamenCooking{ElementId::cookingSlot2, mx, ramenStat},
-        RamenCooking{ElementId::cookingSlot3, mx, ramenStat}, RamenCooking{ElementId::cookingSlot4, mx, ramenStat}};
+
+    RamenCooking slots[]{RamenCooking{ElementId::cookingSlot1, mx}, RamenCooking{ElementId::cookingSlot2, mx},
+                         RamenCooking{ElementId::cookingSlot3, mx}, RamenCooking{ElementId::cookingSlot4, mx}};
     SideBar sideBar{mx};
-    Customers customers{mx, ramenStat};
+    Customer customers[] = {{mx, ElementId::customer1},
+                            {mx, ElementId::customer2},
+                            {mx, ElementId::customer3},
+                            {mx, ElementId::customerRightMost}};
     SDL_Event e;
     while (!quit) {
         SDL_FPoint mousePoint;
@@ -149,9 +153,11 @@ int main(int argc, char* argv[]) {
 
                     selected = clicked == std::end(all) ? ElementId::undefined : clicked->elemId;
                     sideBar.handleClick(selected);
-                    customers.handleClick(selected);
                     for (RamenCooking& r : slots) {
                         r.handleClick(selected);
+                    }
+                    for (Customer& cus : customers) {
+                        cus.handleClick(selected);
                     }
                 }
                 handleHover(selected, mousePoint);
@@ -162,20 +168,26 @@ int main(int argc, char* argv[]) {
             r.handleTick(now);
         }
         sideBar.handleTick(now);
-        customers.handleTick(now);
+        for (Customer& cus : customers) {
+            cus.handleTick(now);
+        }
         renderer.clear();
 
         // Draw background
         bgTexture.show(renderer, bgDst);
-        customers.show(renderer);
+        for (Customer& cus : customers) {
+            cus.show(renderer);
+        }
 
         counterTexture.show(renderer, counterRect);
-        customers.showServedItems(renderer);
+        for (Customer& cus : customers) {
+            cus.showServedItems(renderer);
+        }
         burnerTexture.show(renderer, burnerDst);
 
         // Draw ramen package, sink
         for (const Element& elem : all) {
-            if (!is_customer(elem.elemId) && elem.visible) {
+            if (elem.visible) {
                 const ImageTexture& img = getImage(elem.imgId);
                 img.show(renderer, elem.fpos, elem.ratio, elem.angle);
             }
