@@ -46,6 +46,17 @@ void Renderer::renderTexture(SDL_Texture* tex, const SDL_FRect& rect, float rati
     }
 }
 
+void Renderer::renderTexture(SDL_Texture* tex,
+                             const SDL_FRect& srcRect,
+                             const SDL_FRect& dstRect,
+                             float ratio,
+                             double angle) const {
+    auto rec = enlarge(dstRect, ratio);
+    if (!SDL_RenderTextureRotated(m_renderer, tex, &srcRect, &rec, angle, nullptr, SDL_FLIP_NONE)) {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+    }
+}
+
 void Renderer::fillRect(const SDL_FRect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const {
     SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
     SDL_RenderFillRect(m_renderer, &rect);

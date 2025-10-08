@@ -1,5 +1,6 @@
 #pragma once
 #include "elementId.h"
+#include "imageId.h"
 #include <chrono>
 
 class CookingStatus;
@@ -21,4 +22,5 @@ private:
     bool m_toggle = false;
     const AudioMixer& m_mixer;
     ElementId m_id;
+    ImageId m_imgId;
 };

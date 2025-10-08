@@ -14,6 +14,11 @@ public:
     SDL_Texture* loadTexture(SDL_Surface* surf) const;
 
     void renderTexture(SDL_Texture* tex, const SDL_FRect& rect, float ratio = 1.f, double angle = 0.0) const;
+    void renderTexture(SDL_Texture* tex,
+                       const SDL_FRect& srcRect,
+                       const SDL_FRect& dsRrect,
+                       float ratio  = 1.f,
+                       double angle = 0.0) const;
 
     void fillRect(const SDL_FRect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const;
 

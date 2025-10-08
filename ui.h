@@ -32,10 +32,11 @@ constexpr float counterHeight   = SCREEN_HEIGHT * 0.4f;
 constexpr SDL_FRect counterRect = {0, counterHeight, SCREEN_WIDTH, 0.12f * SCREEN_HEIGHT};
 
 constexpr float cusSize        = SCREEN_WIDTH * 0.2f;
-constexpr SDL_FRect cust1FRect = {SCREEN_WIDTH * 0.1f, counterHeight - 0.8f * cusSize, cusSize, cusSize};
-constexpr SDL_FRect cust2FRect = {cust1FRect.x + cusSize, counterHeight - 0.8f * cusSize, cusSize, cusSize};
-constexpr SDL_FRect cust3FRect = {cust2FRect.x + cusSize, counterHeight - 0.8f * cusSize, cusSize, cusSize};
-constexpr SDL_FRect cust4FRect = {cust3FRect.x + cusSize, counterHeight - 0.8f * cusSize, cusSize, cusSize};
+constexpr float cusHeight      = counterHeight - cusSize + 10.f;
+constexpr SDL_FRect cust1FRect = {0, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust2FRect = {cust1FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust3FRect = {cust2FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust4FRect = {cust3FRect.x + cusSize, cusHeight, cusSize, cusSize};
 
 constexpr float columnX            = SCREEN_WIDTH * 0.85f;
 constexpr float columnFirstY       = SCREEN_HEIGHT * 0.8f;
@@ -72,13 +73,13 @@ constexpr SDL_FRect potFDst3 = {burnerX + burnerSize * 0.06f, burnerY + burnerSi
 
 constexpr SDL_FRect potFDst4 = {burnerX + burnerSize * 0.42f, burnerY + burnerSize * 0.16f, 128, 128};
 
-constexpr SDL_FRect servingSlotFDst1 = {cust1FRect.x + cusSize * 0.3f, cust1FRect.y + cusSize * 0.5f, 80, 80};
+constexpr SDL_FRect servingSlotFDst1 = {cust1FRect.x + cusSize * 0.3f, cust1FRect.y + cusSize * 0.7f, 80, 80};
 
-constexpr SDL_FRect servingSlotFDst2 = {cust2FRect.x + cusSize * 0.3f, cust2FRect.y + cusSize * 0.5f, 80, 80};
+constexpr SDL_FRect servingSlotFDst2 = {cust2FRect.x + cusSize * 0.3f, cust2FRect.y + cusSize * 0.7f, 80, 80};
 
-constexpr SDL_FRect servingSlotFDst3 = {cust3FRect.x + cusSize * 0.3f, cust3FRect.y + cusSize * 0.5f, 80, 80};
+constexpr SDL_FRect servingSlotFDst3 = {cust3FRect.x + cusSize * 0.3f, cust3FRect.y + cusSize * 0.7f, 80, 80};
 
-constexpr SDL_FRect servingSlotFDst4 = {cust4FRect.x + cusSize * 0.3f, cust4FRect.y + cusSize * 0.5f, 80, 80};
+constexpr SDL_FRect servingSlotFDst4 = {cust4FRect.x + cusSize * 0.3f, cust4FRect.y + cusSize * 0.7f, 80, 80};
 
 constexpr SDL_FRect getCookingSlotFRect(ElementId id) {
     switch (id) {

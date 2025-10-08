@@ -20,10 +20,10 @@ Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true,
                  {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot},
                  {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot},
                  {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot},
-                 {cust1FRect, ElementId::customer1, ImageId::customer},
-                 {cust2FRect, ElementId::customer2, ImageId::customer},
-                 {cust3FRect, ElementId::customer3, ImageId::customer},
-                 {cust4FRect, ElementId::customerRightMost, ImageId::customer}};
+                 {cust1FRect, ElementId::customer1, ImageId::customer1},
+                 {cust2FRect, ElementId::customer2, ImageId::customer1},
+                 {cust3FRect, ElementId::customer3, ImageId::customer1},
+                 {cust4FRect, ElementId::customerRightMost, ImageId::customer1}};
 
 class SideBar final {
 public:
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     const ImageTexture& bgTexture       = getImage(ImageId::bg);
     const ImageTexture& counterTexture  = getImage(ImageId::counter_surface);
     const ImageTexture& burnerTexture   = getImage(ImageId::burner);
-    const ImageTexture& customerTexture = getImage(ImageId::customer);
+    const ImageTexture& customerTexture = getImage(ImageId::customer1);
 
     bool quit = false;
 
