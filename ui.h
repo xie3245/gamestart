@@ -50,15 +50,13 @@ constexpr float columnThirdItemY  = columnFirstY - 2 * (columnItemSize + columnI
 constexpr float columnFourthItemY = columnFirstY - 3 * (columnItemSize + columnItemDis);
 constexpr float columnFifthItemY  = columnFirstY - 4 * (columnItemSize + columnItemDis);
 
-constexpr SDL_FRect pkgFRect = {columnX, columnFirstY, columnItemSize, columnItemSize};
-
+constexpr SDL_FRect pkgFRect  = {columnX, columnFirstY, columnItemSize, columnItemSize};
 constexpr SDL_FRect sinkFRect = {columnX, columnSecondItemY, columnItemSize, columnItemSize};
+constexpr SDL_FRect binFRect  = {columnX, columnThirdItemY, columnItemSize, columnItemSize};
 
-constexpr SDL_FRect binFRect = {columnX, columnThirdItemY, columnItemSize, columnItemSize};
-
-constexpr SDL_FRect bowlsFRect = {columnX, columnFourthItemY, columnItemSize, columnItemSize};
-
-constexpr SDL_FRect potToolFRect = {columnX, columnFifthItemY, columnItemSize, columnItemSize};
+constexpr SDL_FRect potToolFRect        = {0, columnThirdItemY + 60, columnItemSize, columnItemSize};
+constexpr SDL_FRect chopsticksToolFRect = {0, columnSecondItemY + 40, columnItemSize, columnItemSize};
+constexpr SDL_FRect bowlsFRect          = {0, columnFirstY + 20, columnItemSize, columnItemSize};
 
 constexpr float burnerX       = SCREEN_WIDTH * 0.3f;
 constexpr float burnerY       = SCREEN_HEIGHT * 0.6f;

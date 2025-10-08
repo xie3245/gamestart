@@ -19,6 +19,7 @@ class RamenCooking final {
         NOODLES_CAPTURED,
         NOODLES_ADDED,
         COOKING,
+        CHOPSTICKS,
         HALF_COOKED,
         COOKED,
         BURNT,

@@ -45,9 +45,16 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::COOKING: {
-        if (elemId == m_elemId) {
+        if (elemId == ElementId::chopsticksSideBar) {
+            m_state = RamenState::CHOPSTICKS;
+        }
+    } break;
+    case RamenState::CHOPSTICKS: {
+        if (elemId == elemId) {
             m_state      = RamenState::HALF_COOKED;
             m_stateStart = m_tick;
+        } else {
+            m_state = RamenState::COOKING;
         }
     } break;
     case RamenState::COOKED: {
@@ -109,7 +116,8 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
             m_stateStart = tick;
         }
     } break;
-    case RamenState::COOKING: {
+    case RamenState::COOKING:
+    case RamenState::CHOPSTICKS: {
         toggleAmplify(tick);
         if ((tick - m_stateStart) > 5s) {
             m_state = RamenState::BURNT;
@@ -172,6 +180,24 @@ void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
         break;
     case RamenState::COOKING:
         showPulsingZoom(rend, ImageId::pot_noodle_cooking);
+        if (m_amplify) {
+            getImage(ImageId::puff)
+                .show(rend, {m_frect.x - 0.05f * m_frect.w, m_frect.y - 30 - 0.05f * m_frect.h, 80.f, 80.f});
+        } else {
+            getImage(ImageId::puff).show(rend, {m_frect.x, m_frect.y - 30, 80.f, 80.f});
+        }
+        break;
+    case RamenState::CHOPSTICKS:
+        showPulsingZoom(rend, ImageId::pot_noodle_cooking);
+        if (m_amplify) {
+            getImage(ImageId::puff)
+                .show(rend, {m_frect.x - 0.05f * m_frect.w, m_frect.y - 30 - 0.05f * m_frect.h, 80.f, 80.f});
+        } else {
+            getImage(ImageId::puff).show(rend, {m_frect.x, m_frect.y - 30, 80.f, 80.f});
+        }
+        getImage(ImageId::chopsticks1)
+            .show(rend, {x - chopsticksToolFRect.w * 0.5f, y - chopsticksToolFRect.h * 0.5f, chopsticksToolFRect.w,
+                         chopsticksToolFRect.h});
         break;
     case RamenState::HALF_COOKED:
         getImage(ImageId::pot_noodle_halfcooked).show(rend, m_frect);
