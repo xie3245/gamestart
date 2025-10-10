@@ -16,9 +16,17 @@ public:
     void showServedItems(const Renderer& rend) const noexcept;
 
 private:
-    enum class CustomerState { undefined, ordered, waiting, eating, leaving } m_state = CustomerState::undefined;
-    std::chrono::milliseconds m_toggleStart;
-    std::chrono::milliseconds m_start;
+    enum class CustomerState {
+        undefined,
+        ordered,
+        waiting,
+        eating,
+        leavingServed,
+        leavingNotServed
+    } m_state = CustomerState::undefined;
+    std::chrono::duration<float, std::milli> m_toggleStart{0.f};
+    std::chrono::duration<float, std::milli> m_start{0.f};
+    std::chrono::duration<float, std::milli> m_tick{0.f};
     bool m_toggle = false;
     const AudioMixer& m_mixer;
     ElementId m_id;
