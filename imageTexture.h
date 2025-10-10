@@ -4,6 +4,7 @@
 #include <SDL3_image/SDL_image.h>
 #include "renderer.h"
 #include "imageId.h"
+#include <memory>
 
 enum class Sprite2x2 {
     upperLeft,
@@ -56,12 +57,12 @@ struct SrcRations final {
 };
 
 class ImageTexture final {
-    SDL_Surface* m_surface = nullptr;
+    std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)> m_surface;
 
 public:
-    ImageTexture(const char* path_to_img);
-
-    ~ImageTexture();
+    explicit ImageTexture(const char* path_to_img) noexcept;
+    explicit ImageTexture() noexcept;
+    ~ImageTexture() noexcept;
 
     ImageTexture(ImageTexture&&)      = default;
     ImageTexture(const ImageTexture&) = delete;

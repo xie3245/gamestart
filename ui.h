@@ -10,6 +10,8 @@ enum class MoveType { undefined, move, click };
 bool isClick(const SDL_Event& e) noexcept;
 bool isServing() noexcept;
 void setServing(bool serve) noexcept;
+int64_t getMoney() noexcept;
+void updateMoney(int64_t diff) noexcept;
 
 inline constexpr SDL_FRect to_frect(const SDL_Rect& r) noexcept {
     return SDL_FRect{static_cast<float>(r.x), static_cast<float>(r.y), static_cast<float>(r.w),

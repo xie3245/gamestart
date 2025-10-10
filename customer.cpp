@@ -84,6 +84,8 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
             m_state = CustomerState::undefined;
             m_start = tick + std::chrono::milliseconds(std::lround(intervalDistr(rng)));
             m_imgId = toImgId(cusDistr(rng));
+            m_mixer.play(SoundId::coins_collection);
+            updateMoney(10);
         }
     } break;
     case CustomerState::leavingNotServed: {

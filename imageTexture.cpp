@@ -1,16 +1,15 @@
 #include "imageTexture.h"
 #include "utils.h"
 
-ImageTexture::ImageTexture(const char* path_to_img) : m_surface(IMG_Load(path_to_img)), m_texture(nullptr) {}
+ImageTexture::ImageTexture(const char* path_to_img) noexcept
+    : m_surface(IMG_Load(path_to_img), SDL_DestroySurface)
+    , m_texture(nullptr) {}
 
-ImageTexture::~ImageTexture() {
-    SDL_DestroyTexture(m_texture);
-    SDL_DestroySurface(m_surface);
-}
+ImageTexture::~ImageTexture() noexcept { SDL_DestroyTexture(m_texture); }
 
 void ImageTexture::show(const Renderer& renderer, const SDL_FRect& rect, float ratio, double angle) const {
     if (!m_texture) {
-        m_texture = renderer.loadTexture(m_surface);
+        m_texture = renderer.loadTexture(m_surface.get());
     }
 
     if (m_texture) {
@@ -20,7 +19,7 @@ void ImageTexture::show(const Renderer& renderer, const SDL_FRect& rect, float r
 
 void ImageTexture::show(const Renderer& renderer, const SrcRations& src, const SDL_FRect& rect) const {
     if (!m_texture) {
-        m_texture = renderer.loadTexture(m_surface);
+        m_texture = renderer.loadTexture(m_surface.get());
     }
 
     if (m_texture) {
@@ -31,44 +30,45 @@ void ImageTexture::show(const Renderer& renderer, const SrcRations& src, const S
 }
 
 static ImageTexture defaultTexture{"assets/undefined.png"};
-static ImageTexture imageMap[] = {{"assets/bg2areasMoreOp.png"},
-                                  {"assets/sink.png"},
-                                  {"assets/sink_water_running.png"},
-                                  {"assets/ramen_pkg.png"},
-                                  {"assets/bowls.png"},
-                                  {"assets/stir_puff.png"},
-                                  {"assets/chopsticks1.png"},
-                                  {"assets/chopsticks2.png"},
-                                  {"assets/empty_bowl.png"},
-                                  {"assets/bowl_with_ramen_cooked3.png"},
-                                  {"assets/trash_bin_closed.png"},
-                                  {"assets/trash_bin_open.png"},
-                                  {"assets/counter_surface_lean.png"},
-                                  {"assets/burner.png"},
-                                  {"assets/pot_empty.png"},
-                                  {"assets/pot_with_water.png"},
-                                  {"assets/pot_with_boiling_water.png"},
-                                  {"assets/pot_with_ramen_uncooked.png"},
-                                  {"assets/pot_with_ramen_halfcooked.png"},
-                                  {"assets/pot_with_ramen_halfcooked1.png"},
-                                  {"assets/pot_with_ramen_cooked.png"},
-                                  {"assets/pot_with_ramen_burnt.png"},
-                                  {"assets/patiencebar.png"},
-                                  {"assets/cus2.png"},
-                                  {"assets/cus4.png"},
-                                  {"assets/cus6.png"},
-                                  {"assets/cus7.png"},
-                                  {"assets/cus8.png"},
-                                  {"assets/cus9.png"},
-                                  {"assets/cus10.png"},
-                                  {"assets/cus11.png"},
-                                  {"assets/cus13.png"},
-                                  {"assets/cus14.png"},
-                                  {"assets/cus17.png"},
-                                  {"assets/cus18.png"},
-                                  {"assets/cus19.png"},
-                                  {"assets/cus20.png"},
-                                  {"assets/cus21.png"}};
+static ImageTexture imageMap[] = {ImageTexture{"assets/bg2areasMoreOp.png"},
+                                  ImageTexture{"assets/sink.png"},
+                                  ImageTexture{"assets/sink_water_running.png"},
+                                  ImageTexture{"assets/ramen_pkg.png"},
+                                  ImageTexture{"assets/bowls.png"},
+                                  ImageTexture{"assets/stir_puff.png"},
+                                  ImageTexture{"assets/chopsticks1.png"},
+                                  ImageTexture{"assets/chopsticks2.png"},
+                                  ImageTexture{"assets/empty_bowl.png"},
+                                  ImageTexture{"assets/bowl_with_ramen_cooked3.png"},
+                                  ImageTexture{"assets/trash_bin_closed.png"},
+                                  ImageTexture{"assets/trash_bin_open.png"},
+                                  ImageTexture{"assets/counter_surface_lean.png"},
+                                  ImageTexture{"assets/burner.png"},
+                                  ImageTexture{"assets/pot_empty.png"},
+                                  ImageTexture{"assets/pot_with_water.png"},
+                                  ImageTexture{"assets/pot_with_boiling_water.png"},
+                                  ImageTexture{"assets/pot_with_ramen_uncooked.png"},
+                                  ImageTexture{"assets/pot_with_ramen_halfcooked.png"},
+                                  ImageTexture{"assets/pot_with_ramen_halfcooked1.png"},
+                                  ImageTexture{"assets/pot_with_ramen_cooked.png"},
+                                  ImageTexture{"assets/pot_with_ramen_burnt.png"},
+                                  ImageTexture{"assets/patiencebar.png"},
+                                  ImageTexture{"assets/coins2.png"},
+                                  ImageTexture{"assets/cus2.png"},
+                                  ImageTexture{"assets/cus4.png"},
+                                  ImageTexture{"assets/cus6.png"},
+                                  ImageTexture{"assets/cus7.png"},
+                                  ImageTexture{"assets/cus8.png"},
+                                  ImageTexture{"assets/cus9.png"},
+                                  ImageTexture{"assets/cus10.png"},
+                                  ImageTexture{"assets/cus11.png"},
+                                  ImageTexture{"assets/cus13.png"},
+                                  ImageTexture{"assets/cus14.png"},
+                                  ImageTexture{"assets/cus17.png"},
+                                  ImageTexture{"assets/cus18.png"},
+                                  ImageTexture{"assets/cus19.png"},
+                                  ImageTexture{"assets/cus20.png"},
+                                  ImageTexture{"assets/cus21.png"}};
 
 const ImageTexture& getImage(ImageId id) {
     if (static_cast<size_t>(id) < static_cast<size_t>(ImageId::last)) {

@@ -28,3 +28,8 @@ bool isClick(const SDL_Event& e) noexcept {
 static bool serving = false;
 bool isServing() noexcept { return serving; }
 void setServing(bool serve) noexcept { serving = serve; }
+
+static int64_t money = 0;
+
+int64_t getMoney() noexcept { return money; }
+void updateMoney(int64_t diff) noexcept { money += diff; }

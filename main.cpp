@@ -10,6 +10,7 @@
 #include "element.h"
 #include "customer.h"
 #include <algorithm>
+#include "money.h"
 
 Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true, true},
                  {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true, true},
@@ -134,6 +135,8 @@ int main(int argc, char* argv[]) {
                             {mx, ElementId::customer2},
                             {mx, ElementId::customer3},
                             {mx, ElementId::customerRightMost}};
+    Money money{};
+
     SDL_Event e;
     while (!quit) {
         SDL_FPoint mousePoint;
@@ -197,6 +200,7 @@ int main(int argc, char* argv[]) {
         for (const RamenCooking& r : slots) {
             r.show(renderer, mousePoint.x, mousePoint.y);
         }
+        money.show(renderer);
         renderer.update();
     }
 
