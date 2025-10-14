@@ -12,6 +12,8 @@ bool isServing() noexcept;
 void setServing(bool serve) noexcept;
 int64_t getMoney() noexcept;
 void updateMoney(int64_t diff) noexcept;
+float getRating() noexcept;
+void updateRating(int rating) noexcept;
 
 inline constexpr SDL_FRect to_frect(const SDL_Rect& r) noexcept {
     return SDL_FRect{static_cast<float>(r.x), static_cast<float>(r.y), static_cast<float>(r.w),
@@ -25,26 +27,29 @@ inline SDL_Rect frect_round(const SDL_FRect& r) noexcept {
 
 bool isMouse(const SDL_Event& e) noexcept;
 
-constexpr int SCREEN_WIDTH  = 800;
-constexpr int SCREEN_HEIGHT = 600;
+constexpr int SCREEN_WIDTH  = 1920;
+constexpr int SCREEN_HEIGHT = 1080;
 
 constexpr SDL_FRect bgDst = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
 
+constexpr float cusSize         = 160.f;
 constexpr float counterHeight   = SCREEN_HEIGHT * 0.4f;
-constexpr SDL_FRect counterRect = {0, counterHeight, SCREEN_WIDTH, 0.12f * SCREEN_HEIGHT};
+constexpr SDL_FRect counterRect = {0, counterHeight, SCREEN_WIDTH, 72.f};
 
-constexpr float cusSize        = SCREEN_WIDTH * 0.2f;
-constexpr float cusHeight      = counterHeight - cusSize + 10.f;
-constexpr SDL_FRect cust1FRect = {0, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust2FRect = {cust1FRect.x + cusSize, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust3FRect = {cust2FRect.x + cusSize, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust4FRect = {cust3FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr float cusHeight           = counterHeight - cusSize + 10.f;
+constexpr float cusBegin            = 40.f;
+constexpr SDL_FRect cust1FRect      = {cusBegin, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust2FRect      = {cust1FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust3FRect      = {cust2FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust4FRect      = {cust3FRect.x + cusSize, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust1OrderFRect = {cust1FRect.x, counterHeight, cusSize, cusSize};
+constexpr SDL_FRect cust2OrderFRect = {cust2FRect.x, counterHeight, cusSize, cusSize};
+constexpr SDL_FRect cust3OrderFRect = {cust3FRect.x, counterHeight, cusSize, cusSize};
+constexpr SDL_FRect cust4OrderFRect = {cust4FRect.x, counterHeight, cusSize, cusSize};
 
-constexpr float columnX            = SCREEN_WIDTH * 0.85f;
-constexpr float columnFirstY       = SCREEN_HEIGHT * 0.8f;
-constexpr float columnItemSize     = std::min(SCREEN_WIDTH - columnX, std::min(SCREEN_HEIGHT - columnFirstY, 100.f));
-constexpr float columnCenterX      = columnX + columnItemSize * 0.5f;
-constexpr float columnCenterYFirst = columnFirstY + columnItemSize * 0.5f;
+constexpr float columnItemSize = 50.f + 50 * SCREEN_HEIGHT / 600.f;
+constexpr float columnX        = SCREEN_WIDTH - columnItemSize - 20.f;
+constexpr float columnFirstY   = SCREEN_HEIGHT - columnItemSize - 20.f;
 
 constexpr int columnItemDis       = 10;
 constexpr float columnSecondItemY = columnFirstY - columnItemSize - columnItemDis;
@@ -56,22 +61,24 @@ constexpr SDL_FRect pkgFRect  = {columnX, columnFirstY, columnItemSize, columnIt
 constexpr SDL_FRect sinkFRect = {columnX, columnSecondItemY, columnItemSize, columnItemSize};
 constexpr SDL_FRect binFRect  = {columnX, columnThirdItemY, columnItemSize, columnItemSize};
 
-constexpr SDL_FRect potToolFRect        = {0, columnThirdItemY + 60, columnItemSize, columnItemSize};
-constexpr SDL_FRect chopsticksToolFRect = {0, columnSecondItemY + 40, columnItemSize, columnItemSize};
-constexpr SDL_FRect bowlsFRect          = {0, columnFirstY + 20, columnItemSize, columnItemSize};
+constexpr float leftBarBegin            = SCREEN_WIDTH > 800 ? 20.f : 0.f;
+constexpr SDL_FRect potToolFRect        = {leftBarBegin, columnThirdItemY, columnItemSize, columnItemSize};
+constexpr SDL_FRect chopsticksToolFRect = {leftBarBegin, columnSecondItemY, columnItemSize, columnItemSize};
+constexpr SDL_FRect bowlsFRect          = {leftBarBegin, columnFirstY, columnItemSize, columnItemSize};
 
-constexpr float burnerX       = SCREEN_WIDTH * 0.3f;
-constexpr float burnerY       = SCREEN_HEIGHT * 0.6f;
-constexpr float burnerSize    = 250.f;
-constexpr SDL_FRect burnerDst = {burnerX, burnerY, burnerSize, burnerSize};
+constexpr float cookerSize = 128.f + 10.f * SCREEN_HEIGHT / 600.f;
+constexpr float cookerY = SCREEN_HEIGHT - cookerSize - (columnItemSize - columnItemDis) * (SCREEN_HEIGHT - 600) / 600.f;
 
-constexpr SDL_FRect potFDst1 = {burnerX + burnerSize * 0.12f, burnerY - burnerSize * 0.08f, 128, 128};
-
-constexpr SDL_FRect potFDst2 = {burnerX + burnerSize * 0.47f, burnerY - burnerSize * 0.08f, 128, 128};
-
-constexpr SDL_FRect potFDst3 = {burnerX + burnerSize * 0.06f, burnerY + burnerSize * 0.16f, 128, 128};
-
-constexpr SDL_FRect potFDst4 = {burnerX + burnerSize * 0.42f, burnerY + burnerSize * 0.16f, 128, 128};
+constexpr SDL_FRect cookerFDst1 = {SCREEN_WIDTH * 0.5f - 2.f * cookerSize, cookerY, cookerSize, cookerSize};
+constexpr SDL_FRect cookerFDst2 = {cookerFDst1.x + cookerSize, cookerY, cookerSize, cookerSize};
+constexpr SDL_FRect cookerFDst3 = {cookerFDst2.x + cookerSize, cookerY, cookerSize, cookerSize};
+constexpr SDL_FRect cookerFDst4 = {cookerFDst3.x + cookerSize, cookerY, cookerSize, cookerSize};
+constexpr float potSizeCooking  = cookerSize;
+constexpr float potYCooking     = cookerY - potSizeCooking * 0.4f;
+constexpr SDL_FRect potFDst1    = {cookerFDst1.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst2    = {cookerFDst2.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst3    = {cookerFDst3.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst4    = {cookerFDst4.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
 
 constexpr SDL_FRect servingSlotFDst1 = {cust1FRect.x + cusSize * 0.3f, cust1FRect.y + cusSize * 0.7f, 80, 80};
 
@@ -106,6 +113,21 @@ constexpr SDL_FRect getCustSlotFRect(ElementId id) {
         return cust3FRect;
     case ElementId::customerRightMost:
         return cust4FRect;
+    default:
+        return {0, 0, 0, 0};
+    }
+}
+
+constexpr SDL_FRect getOrderSlotFRect(ElementId id) {
+    switch (id) {
+    case ElementId::customer1:
+        return cust1OrderFRect;
+    case ElementId::customer2:
+        return cust2OrderFRect;
+    case ElementId::customer3:
+        return cust3OrderFRect;
+    case ElementId::customerRightMost:
+        return cust4OrderFRect;
     default:
         return {0, 0, 0, 0};
     }

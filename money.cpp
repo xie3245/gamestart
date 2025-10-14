@@ -38,3 +38,10 @@ void Money::show(const Renderer& rend) noexcept {
     }
     m_lastShown = curr;
 }
+
+void showRating(const Renderer& rend) noexcept {
+    getImage(ImageId::star).show(rend, {Sprite2x1::left, getRating()}, {400, 10, 40 * getRating(), 40});
+
+    for (float x = 400.f; x < (400.f + 5 * 40.f); x += 40.f)
+        getImage(ImageId::star).show(rend, Sprite2x1::right, {x, 10, 40, 40});
+}

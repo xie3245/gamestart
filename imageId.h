@@ -25,6 +25,8 @@ enum class ImageId {
     pot_burnt,
     patiencebar,
     coins,
+    star,
+    orderPostIt,
     customer0,
     customer1,
     customer2,

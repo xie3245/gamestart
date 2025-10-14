@@ -8,6 +8,9 @@ class Renderer final {
 public:
     Renderer();
 
+    Renderer(const Renderer&)             = delete;
+    Renderer& operator()(const Renderer&) = delete;
+
     ~Renderer();
 
     SDL_Texture* loadTexture(const char* path) const;
@@ -26,7 +29,10 @@ public:
 
     void clear() const;
 
+    void captureFrame() const noexcept;
+
 private:
-    SDL_Window* m_window     = nullptr;
-    SDL_Renderer* m_renderer = nullptr;
+    SDL_Window* m_window      = nullptr;
+    SDL_Renderer* m_renderer  = nullptr;
+    mutable uint64_t frameCnt = 0u;
 };

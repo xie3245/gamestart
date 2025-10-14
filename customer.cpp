@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 constexpr std::chrono::duration<float> waitTime = 30s;
 
 Customer::Customer(const AudioMixer& mx, ElementId id) noexcept
-    : m_start(std::chrono::milliseconds(std::lround(intervalDistr(rng))))
+    : m_start(std::chrono::milliseconds(5s /* std::lround(intervalDistr(rng)) */))
     , m_mixer(mx)
     , m_id(id)
     , m_imgId(toImgId(cusDistr(rng))) {}
@@ -34,6 +34,8 @@ void Customer::handleClick(ElementId clicked) noexcept {
             m_state = CustomerState::eating;
             m_mixer.play(SoundId::slurp);
             setServing(false);
+            auto rating = ((m_tick - m_start) > (0.5f * waitTime)) ? 1 : 2;
+            updateRating(rating);
             m_toggleStart = m_tick;
             m_start       = m_tick;
         } else if (!isServing()) {
@@ -49,6 +51,12 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
     switch (m_state) {
     case CustomerState::undefined: {
         if (m_start < tick) {
+            m_state = CustomerState::ordering;
+            m_start = tick;
+        }
+    } break;
+    case CustomerState::ordering: {
+        if (tick - m_start > 1s) {
             m_state = isServing() ? CustomerState::waiting : CustomerState::ordered;
             m_start = tick;
         }
@@ -104,20 +112,20 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
 
 SrcRations getBarOutline(float patience) noexcept {
     if (patience > 0.6f) {
-        return {Sprite3x2::upperLeft};
+        return {Sprite2x3::upperRight};
     } else if (patience > 0.2f) {
-        return {Sprite3x2::upperMiddle};
+        return {Sprite2x3::middleRight};
     }
-    return {Sprite3x2::upperRight};
+    return {Sprite2x3::lowerRight};
 }
 
 SrcRations getBarFilling(float patience) noexcept {
     if (patience > 0.6f) {
-        return {Sprite3x2::lowerLeft, patience};
+        return {Sprite2x3::upperLeft, patience};
     } else if (patience > 0.2f) {
-        return {Sprite3x2::lowerMiddle, patience};
+        return {Sprite2x3::middleLeft, patience};
     }
-    return {Sprite3x2::lowerRight, patience};
+    return {Sprite2x3::lowerLeft, patience};
 }
 
 void Customer::show(const Renderer& rend) const noexcept {
@@ -133,25 +141,31 @@ void Customer::show(const Renderer& rend) const noexcept {
     case CustomerState::leavingServed: {
         getImage(m_imgId).show(rend, Sprite2x2::lowerRight, cusFRect);
     } break;
+    case CustomerState::ordering:
+        getImage(m_imgId).show(rend, Sprite2x2::upperLeft, cusFRect);
+        break;
     case CustomerState::ordered:
     case CustomerState::waiting: {
         getImage(m_imgId).show(rend, Sprite2x2::upperLeft, cusFRect);
         float elapsed_ratio  = (m_tick - m_start) / waitTime;
         float patience_ratio = 1.f - elapsed_ratio;
         getImage(ImageId::patiencebar)
-            .show(rend, getBarOutline(patience_ratio),
-                  {cusFRect.x + cusFRect.w * 0.25f, counterHeight - cusSize, cusFRect.w * 0.5f, 10});
+            .show(rend, getBarOutline(patience_ratio), {cusFRect.x + 10, cusFRect.y, 10, cusFRect.h * 0.5f});
         getImage(ImageId::patiencebar)
             .show(rend, getBarFilling(patience_ratio),
-                  {cusFRect.x + cusFRect.w * 0.25f, counterHeight - cusSize, cusFRect.w * 0.5f * patience_ratio, 10});
+                  {cusFRect.x + 10, cusFRect.y, 10, cusFRect.h * 0.5f * patience_ratio});
     } break;
     default:
         break;
     }
 }
 
-void Customer::showServedItems(const Renderer& rend) const noexcept {
+void Customer::showItemsBeforeCounter(const Renderer& rend) const noexcept {
     switch (m_state) {
+    case CustomerState::ordered:
+    case CustomerState::waiting: {
+        getImage(ImageId::orderPostIt).show(rend, getOrderSlotFRect(m_id));
+    } break;
     case CustomerState::eating:
         getImage(ImageId::bowl_with_ramen_plain).show(rend, getServingSlotFRect(m_id));
         break;

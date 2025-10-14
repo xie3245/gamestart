@@ -13,11 +13,12 @@ public:
     void handleClick(ElementId clicked) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
     void show(const Renderer& rend) const noexcept;
-    void showServedItems(const Renderer& rend) const noexcept;
+    void showItemsBeforeCounter(const Renderer& rend) const noexcept;
 
 private:
     enum class CustomerState {
         undefined,
+        ordering,
         ordered,
         waiting,
         eating,

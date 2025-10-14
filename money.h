@@ -17,3 +17,5 @@ private:
     std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)> m_texture;
     int64_t m_lastShown = 0u;
 };
+
+void showRating(const Renderer& rend) noexcept;

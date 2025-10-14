@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "money.h"
 
+using namespace std::chrono_literals;
 Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true, true},
                  {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true, true},
                  {sinkFRect, ElementId::sinkSideBar, ImageId::sink, true, true},
@@ -121,10 +122,9 @@ int main(int argc, char* argv[]) {
     mx.play(SoundId::bgm, -1, 0.3f);
 
     // Load textures
-    const ImageTexture& bgTexture       = getImage(ImageId::bg);
-    const ImageTexture& counterTexture  = getImage(ImageId::counter_surface);
-    const ImageTexture& burnerTexture   = getImage(ImageId::burner);
-    const ImageTexture& customerTexture = getImage(ImageId::customer1);
+    const ImageTexture& bgTexture      = getImage(ImageId::bg);
+    const ImageTexture& counterTexture = getImage(ImageId::counter_surface);
+    const ImageTexture& burnerTexture  = getImage(ImageId::burner);
 
     bool quit = false;
 
@@ -138,13 +138,15 @@ int main(int argc, char* argv[]) {
     Money money{};
 
     SDL_Event e;
+    auto captured = 0ms;
     while (!quit) {
         SDL_FPoint mousePoint;
         while (SDL_PollEvent(&e)) {
+            // std::cout << "type: " << e.type << "code: " << e.key.key << std::endl;
             mousePoint.x = e.button.x;
             mousePoint.y = e.button.y;
 
-            if (e.type == SDL_EVENT_QUIT) {
+            if (e.type == SDL_EVENT_QUIT || (e.key.key == SDLK_ESCAPE)) {
                 quit = true;
                 break;
             } else if (isMouse(e)) {
@@ -185,9 +187,12 @@ int main(int argc, char* argv[]) {
 
         counterTexture.show(renderer, counterRect);
         for (Customer& cus : customers) {
-            cus.showServedItems(renderer);
+            cus.showItemsBeforeCounter(renderer);
         }
-        burnerTexture.show(renderer, burnerDst);
+        burnerTexture.show(renderer, cookerFDst1);
+        burnerTexture.show(renderer, cookerFDst2);
+        burnerTexture.show(renderer, cookerFDst3);
+        burnerTexture.show(renderer, cookerFDst4);
 
         // Draw ramen package, sink
         for (const Element& elem : all) {
@@ -201,6 +206,12 @@ int main(int argc, char* argv[]) {
             r.show(renderer, mousePoint.x, mousePoint.y);
         }
         money.show(renderer);
+        showRating(renderer);
+
+        // if (now - captured > 500ms) {
+        //     renderer.captureFrame();
+        //     captured = now;
+        // }
         renderer.update();
     }
 

@@ -34,6 +34,15 @@ SDL_Texture* Renderer::loadTexture(SDL_Surface* surf) const {
     return tex;
 }
 
+void Renderer::captureFrame() const noexcept {
+    SDL_Surface* surface = SDL_RenderReadPixels(m_renderer, nullptr);
+    char filename[64];
+    std::sprintf(filename, "captures/frame%04d.bmp", frameCnt);
+    SDL_SaveBMP(surface, filename);
+
+    SDL_DestroySurface(surface);
+}
+
 static SDL_FRect enlarge(const SDL_FRect& orig, float ratio) noexcept {
     return {orig.x - orig.w * (ratio - 1.f) * 0.5f, orig.y - orig.h * (ratio - 1.f) * 0.5f, orig.w * ratio,
             orig.h * ratio};
@@ -62,6 +71,9 @@ void Renderer::fillRect(const SDL_FRect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 
     SDL_RenderFillRect(m_renderer, &rect);
 }
 
-void Renderer::update() const { SDL_RenderPresent(m_renderer); }
+void Renderer::update() const {
+    SDL_RenderPresent(m_renderer);
+    ++frameCnt;
+}
 
 void Renderer::clear() const { SDL_RenderClear(m_renderer); }

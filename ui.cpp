@@ -33,3 +33,12 @@ static int64_t money = 0;
 
 int64_t getMoney() noexcept { return money; }
 void updateMoney(int64_t diff) noexcept { money += diff; }
+
+static float averageRating    = 5.f;
+static uint64_t customerCount = 0;
+
+float getRating() noexcept { return averageRating / 10.f; }
+void updateRating(int rating) noexcept {
+    ++customerCount;
+    averageRating = (averageRating + rating) / customerCount;
+}
