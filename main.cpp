@@ -9,7 +9,7 @@
 #include "element.h"
 #include "customer.h"
 #include <algorithm>
-#include "money.h"
+#include "stats.h"
 #include "sidebar.h"
 
 using namespace std::chrono_literals;

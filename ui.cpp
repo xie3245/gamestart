@@ -9,9 +9,9 @@ bool isClick(const SDL_Event& e) noexcept {
     if (!isMouse(e)) {
         return false;
     }
-    static MoveType prev_type = MoveType::undefined;
-    static float press_x      = 0.f;
-    static float press_y      = 0.f;
+
+    static float press_x = 0.f;
+    static float press_y = 0.f;
     if (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         press_x = e.button.x;
         press_y = e.button.y;
@@ -28,16 +28,3 @@ bool isClick(const SDL_Event& e) noexcept {
 static bool serving = false;
 bool isServing() noexcept { return serving; }
 void setServing(bool serve) noexcept { serving = serve; }
-
-static int64_t money = 0;
-
-int64_t getMoney() noexcept { return money; }
-void gainMoney(uint16_t diff) noexcept { money += diff; }
-void loseMoney(uint16_t diff) noexcept { money -= diff; }
-
-static float averageRating = 0.f;
-
-// exponentially weighted moving average (EWMA) restaurantStars_today = (1-α)·prev + α·todayAverage, α controls
-// responsiveness
-float getRating() noexcept { return averageRating; }
-void updateRating(int rating) noexcept { averageRating = 0.8f * averageRating + 0.2 * rating; }

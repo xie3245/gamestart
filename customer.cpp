@@ -3,6 +3,7 @@
 #include "sound.h"
 #include <random>
 #include <cmath>
+#include "stats.h"
 
 namespace {
 std::random_device rd{};
