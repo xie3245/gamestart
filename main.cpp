@@ -11,6 +11,7 @@
 #include "customer.h"
 #include <algorithm>
 #include "money.h"
+#include "sidebar.h"
 
 using namespace std::chrono_literals;
 Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true, true},
@@ -27,72 +28,6 @@ Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true,
                  {cust2FRect, ElementId::customer2, ImageId::customer1},
                  {cust3FRect, ElementId::customer3, ImageId::customer1},
                  {cust4FRect, ElementId::customerRightMost, ImageId::customer1}};
-
-class SideBar final {
-public:
-    explicit SideBar(const AudioMixer& mx) noexcept : m_mixer(mx) {}
-    void handleClick(ElementId elemId) noexcept {
-        if (!sinkClicked && elemId == ElementId::sinkSideBar) {
-            auto sink = std::find_if(std::begin(all), std::end(all),
-                                     [](const Element& e) { return e.elemId == ElementId::sinkSideBar; });
-            if (sink != std::end(all)) {
-                sink->imgId = ImageId::sink_running_water;
-                sink->ratio = 1.5f;
-            }
-            sinkClicked = true;
-            m_mixer.play(SoundId::running_water);
-        }
-
-        if (!binClicked && elemId == ElementId::binSideBar) {
-            auto bin = std::find_if(std::begin(all), std::end(all),
-                                    [](const Element& e) { return e.elemId == ElementId::binSideBar; });
-            if (bin != std::end(all)) {
-                bin->imgId = ImageId::bin_open;
-                bin->ratio = 1.5f;
-            }
-            binClicked = true;
-            m_mixer.play(SoundId::bin_open);
-        }
-    }
-
-    void handleTick(std::chrono::milliseconds tick) {
-        using namespace std::chrono_literals;
-        if (sinkClicked) {
-            if ((tick - sinkStart) > 500ms) {
-                auto itr = std::find_if(std::begin(all), std::end(all),
-                                        [](const Element& e) { return e.elemId == ElementId::sinkSideBar; });
-                if (itr != std::end(all)) {
-                    itr->imgId = ImageId::sink;
-                    itr->ratio = 1.f;
-                }
-                sinkClicked = false;
-            }
-        } else {
-            sinkStart = tick;
-        }
-
-        if (binClicked) {
-            if ((tick - binStart) > 500ms) {
-                auto itr = std::find_if(std::begin(all), std::end(all),
-                                        [](const Element& e) { return e.elemId == ElementId::binSideBar; });
-                if (itr != std::end(all)) {
-                    itr->imgId = ImageId::bin;
-                    itr->ratio = 1.f;
-                }
-                binClicked = false;
-            }
-        } else {
-            binStart = tick;
-        }
-    }
-
-private:
-    const AudioMixer& m_mixer;
-    bool sinkClicked = false;
-    bool binClicked  = false;
-    std::chrono::milliseconds sinkStart;
-    std::chrono::milliseconds binStart;
-};
 
 void handleHover(ElementId clicked, const SDL_FPoint& mousePoint) noexcept {
     static auto hovered = std::end(all);
@@ -125,20 +60,28 @@ int main(int argc, char* argv[]) {
     const ImageTexture& bgTexture      = getImage(ImageId::bg);
     const ImageTexture& counterTexture = getImage(ImageId::counter_surface);
     const ImageTexture& burnerTexture  = getImage(ImageId::burner);
+    // const ImageTexture& fridgeTexture  = getImage(ImageId::fridge);
+
+    FontTexture clkTexture{};
 
     bool quit = false;
 
     RamenCooking slots[]{RamenCooking{ElementId::cookingSlot1, mx}, RamenCooking{ElementId::cookingSlot2, mx},
                          RamenCooking{ElementId::cookingSlot3, mx}, RamenCooking{ElementId::cookingSlot4, mx}};
-    SideBar sideBar{mx};
+
+    SideBar sideBar{mx, std::span(all)};
+
     Customer customers[] = {{mx, ElementId::customer1},
                             {mx, ElementId::customer2},
                             {mx, ElementId::customer3},
                             {mx, ElementId::customerRightMost}};
     Money money{};
 
+    constexpr std::chrono::milliseconds cycleDuration = 2min;
+    std::chrono::milliseconds gameClk{0};
+    std::chrono::milliseconds prevSysClk{0};
     SDL_Event e;
-    auto captured = 0ms;
+    // auto captured = 0ms;
     while (!quit) {
         SDL_FPoint mousePoint;
         while (SDL_PollEvent(&e)) {
@@ -169,22 +112,30 @@ int main(int argc, char* argv[]) {
                 handleHover(selected, mousePoint);
             }
         }
-        auto now = std::chrono::milliseconds(SDL_GetTicks());
+        auto now   = std::chrono::milliseconds(SDL_GetTicks());
+        gameClk    = std::min(gameClk + (now - prevSysClk), cycleDuration);
+        prevSysClk = now;
+
         for (RamenCooking& r : slots) {
-            r.handleTick(now);
+            r.handleTick(gameClk);
         }
-        sideBar.handleTick(now);
+        sideBar.handleTick(gameClk);
         for (Customer& cus : customers) {
-            cus.handleTick(now);
+            cus.handleTick(gameClk);
         }
         renderer.clear();
 
         // Draw background
         bgTexture.show(renderer, bgDst);
+
+        clkTexture.show(renderer,
+                        std::to_string(std::chrono::duration_cast<std::chrono::seconds>(gameClk).count()) + "s",
+                        color::black, 800, 10);
+
         for (Customer& cus : customers) {
             cus.show(renderer);
         }
-
+        // fridgeTexture.show(renderer, Sprite2x1::left, {800, 200, 400, 400});
         counterTexture.show(renderer, counterRect);
         for (Customer& cus : customers) {
             cus.showItemsBeforeCounter(renderer);
@@ -213,6 +164,16 @@ int main(int argc, char* argv[]) {
         //     captured = now;
         // }
         renderer.update();
+        if (gameClk == cycleDuration) {
+            gameClk = 0ms;
+            for (RamenCooking& r : slots) {
+                r.handleCycleEnd();
+            }
+            for (Customer& cus : customers) {
+                cus.handleCycleEnd();
+            }
+            setServing(false);
+        }
     }
 
     return 0;

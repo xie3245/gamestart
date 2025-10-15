@@ -32,13 +32,12 @@ void setServing(bool serve) noexcept { serving = serve; }
 static int64_t money = 0;
 
 int64_t getMoney() noexcept { return money; }
-void updateMoney(int64_t diff) noexcept { money += diff; }
+void gainMoney(uint16_t diff) noexcept { money += diff; }
+void loseMoney(uint16_t diff) noexcept { money -= diff; }
 
-static float averageRating    = 5.f;
-static uint64_t customerCount = 0;
+static float averageRating = 0.f;
 
-float getRating() noexcept { return averageRating / 10.f; }
-void updateRating(int rating) noexcept {
-    ++customerCount;
-    averageRating = (averageRating + rating) / customerCount;
-}
+// exponentially weighted moving average (EWMA) restaurantStars_today = (1-α)·prev + α·todayAverage, α controls
+// responsiveness
+float getRating() noexcept { return averageRating; }
+void updateRating(int rating) noexcept { averageRating = 0.8f * averageRating + 0.2 * rating; }

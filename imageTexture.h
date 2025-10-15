@@ -61,7 +61,6 @@ class ImageTexture final {
 
 public:
     explicit ImageTexture(const char* path_to_img) noexcept;
-    explicit ImageTexture() noexcept;
     ~ImageTexture() noexcept;
 
     ImageTexture(ImageTexture&&)      = default;

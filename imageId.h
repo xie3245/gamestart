@@ -27,6 +27,7 @@ enum class ImageId {
     coins,
     star,
     orderPostIt,
+    fridge,
     customer0,
     customer1,
     customer2,

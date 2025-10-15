@@ -22,7 +22,7 @@ public:
                        const SDL_FRect& dsRrect,
                        float ratio  = 1.f,
                        double angle = 0.0) const;
-
+    void renderLine(float x1, float y1, float x2, float y2) const noexcept;
     void fillRect(const SDL_FRect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const;
 
     void update() const;

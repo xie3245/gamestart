@@ -17,7 +17,8 @@ using namespace std::chrono_literals;
 constexpr std::chrono::duration<float> waitTime = 30s;
 
 Customer::Customer(const AudioMixer& mx, ElementId id) noexcept
-    : m_start(std::chrono::milliseconds(5s /* std::lround(intervalDistr(rng)) */))
+    : m_start(std::chrono::milliseconds(
+          std::lround(std::exponential_distribution<float>{customersPerMinute / 60000.f}(rng))))
     , m_mixer(mx)
     , m_id(id)
     , m_imgId(toImgId(cusDistr(rng))) {}
@@ -93,11 +94,12 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
             m_start = tick + std::chrono::milliseconds(std::lround(intervalDistr(rng)));
             m_imgId = toImgId(cusDistr(rng));
             m_mixer.play(SoundId::coins_collection);
-            updateMoney(10);
+            gainMoney(5);
         }
     } break;
     case CustomerState::leavingNotServed: {
         m_state = CustomerState::undefined;
+        updateRating(0);
         m_start = tick + std::chrono::milliseconds(std::lround(intervalDistr(rng)));
         m_imgId = toImgId(cusDistr(rng));
 
@@ -147,7 +149,7 @@ void Customer::show(const Renderer& rend) const noexcept {
     case CustomerState::ordered:
     case CustomerState::waiting: {
         getImage(m_imgId).show(rend, Sprite2x2::upperLeft, cusFRect);
-        float elapsed_ratio  = (m_tick - m_start) / waitTime;
+        float elapsed_ratio  = std::chrono::duration<float, std::milli>(m_tick - m_start) / waitTime;
         float patience_ratio = 1.f - elapsed_ratio;
         getImage(ImageId::patiencebar)
             .show(rend, getBarOutline(patience_ratio), {cusFRect.x + 10, cusFRect.y, 10, cusFRect.h * 0.5f});
@@ -164,12 +166,31 @@ void Customer::showItemsBeforeCounter(const Renderer& rend) const noexcept {
     switch (m_state) {
     case CustomerState::ordered:
     case CustomerState::waiting: {
-        getImage(ImageId::orderPostIt).show(rend, getOrderSlotFRect(m_id));
+        auto dst = getOrderSlotFRect(m_id);
+        getImage(ImageId::orderPostIt).show(rend, dst);
+        m_text.show(rend, "ramen", color::black, dst.x + orderTextIndentX, dst.y + orderTextIndentY);
+        // getImage(ImageId::ramenPkg).show(rend, {dst.x + orderTextIndentX, dst.y + orderTextIndentY, 50.f, 50.f});
     } break;
-    case CustomerState::eating:
+    case CustomerState::eating: {
         getImage(ImageId::bowl_with_ramen_plain).show(rend, getServingSlotFRect(m_id));
-        break;
+        auto dst = getOrderSlotFRect(m_id);
+        getImage(ImageId::orderPostIt).show(rend, dst);
+        m_text.show(rend, "ramen", color::black, dst.x + orderTextIndentX, dst.y + orderTextIndentY);
+        // getImage(ImageId::ramenPkg).show(rend, {dst.x + orderTextIndentX, dst.y + orderTextIndentY, 50.f, 50.f});
+        rend.renderLine(dst.x + orderTextIndentX, dst.y + orderTextIndentY + m_text.height() * 0.5f,
+                        dst.x + orderTextIndentX + m_text.width(), dst.y + orderTextIndentY + m_text.height() * 0.5f);
+    } break;
     default:
         break;
     }
+}
+
+void Customer::handleCycleStart() noexcept {}
+void Customer::handleCycleEnd() noexcept {
+    m_state       = CustomerState::undefined;
+    m_toggleStart = 0ms;
+    m_tick        = 0ms;
+    m_toggle      = false;
+    m_start       = std::chrono::milliseconds(std::lround(intervalDistr(rng)));
+    m_imgId       = toImgId(cusDistr(rng));
 }

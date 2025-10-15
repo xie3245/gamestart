@@ -11,7 +11,8 @@ bool isClick(const SDL_Event& e) noexcept;
 bool isServing() noexcept;
 void setServing(bool serve) noexcept;
 int64_t getMoney() noexcept;
-void updateMoney(int64_t diff) noexcept;
+void gainMoney(uint16_t diff) noexcept;
+void loseMoney(uint16_t diff) noexcept;
 float getRating() noexcept;
 void updateRating(int rating) noexcept;
 
@@ -27,17 +28,34 @@ inline SDL_Rect frect_round(const SDL_FRect& r) noexcept {
 
 bool isMouse(const SDL_Event& e) noexcept;
 
-constexpr int SCREEN_WIDTH  = 1920;
-constexpr int SCREEN_HEIGHT = 1080;
+constexpr int SCREEN_WIDTH       = 1920;
+constexpr int SCREEN_HEIGHT      = 1080;
+constexpr int HALF_WIDTH         = SCREEN_WIDTH / 2;
+constexpr int HALF_HEIGHT        = SCREEN_HEIGHT / 2;
+constexpr float counterHeight    = SCREEN_HEIGHT * 0.4f;
+constexpr float cookingToolSize  = 50.f * SCREEN_HEIGHT / 600.f;
+constexpr float appliancesSize   = 50.f + 50.f * SCREEN_HEIGHT / 600.f;
+constexpr float columnX          = SCREEN_WIDTH - appliancesSize - 20.f;
+constexpr float columnFirstY     = SCREEN_HEIGHT - appliancesSize - 20.f;
+constexpr int itemDis            = 10;
+constexpr float cookerSize       = 128.f + 10.f * SCREEN_HEIGHT / 600.f;
+constexpr float cookerY          = counterHeight + (SCREEN_HEIGHT - counterHeight) * 0.5f;
+constexpr float potSizeCooking   = cookerSize;
+constexpr float potYCooking      = cookerY - potSizeCooking * 0.4f;
+constexpr float orderTextIndentX = 40.f;
+constexpr float orderTextIndentY = 50.f;
+constexpr float cusSize          = 160.f;
+constexpr float cusHeight        = counterHeight - cusSize + 10.f;
+constexpr float cusBegin         = 40.f;
+constexpr float leftBarBegin     = SCREEN_WIDTH > 800 ? 20.f : 0.f;
+namespace color {
+constexpr SDL_Color black{0, 0, 0, 255};
+constexpr SDL_Color gold{245, 131, 39, 255};
+}  // namespace color
 
-constexpr SDL_FRect bgDst = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
-
-constexpr float cusSize         = 160.f;
-constexpr float counterHeight   = SCREEN_HEIGHT * 0.4f;
+constexpr SDL_FRect bgDst       = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
 constexpr SDL_FRect counterRect = {0, counterHeight, SCREEN_WIDTH, 72.f};
 
-constexpr float cusHeight           = counterHeight - cusSize + 10.f;
-constexpr float cusBegin            = 40.f;
 constexpr SDL_FRect cust1FRect      = {cusBegin, cusHeight, cusSize, cusSize};
 constexpr SDL_FRect cust2FRect      = {cust1FRect.x + cusSize, cusHeight, cusSize, cusSize};
 constexpr SDL_FRect cust3FRect      = {cust2FRect.x + cusSize, cusHeight, cusSize, cusSize};
@@ -47,38 +65,35 @@ constexpr SDL_FRect cust2OrderFRect = {cust2FRect.x, counterHeight, cusSize, cus
 constexpr SDL_FRect cust3OrderFRect = {cust3FRect.x, counterHeight, cusSize, cusSize};
 constexpr SDL_FRect cust4OrderFRect = {cust4FRect.x, counterHeight, cusSize, cusSize};
 
-constexpr float columnItemSize = 50.f + 50 * SCREEN_HEIGHT / 600.f;
-constexpr float columnX        = SCREEN_WIDTH - columnItemSize - 20.f;
-constexpr float columnFirstY   = SCREEN_HEIGHT - columnItemSize - 20.f;
-
-constexpr int columnItemDis       = 10;
-constexpr float columnSecondItemY = columnFirstY - columnItemSize - columnItemDis;
-constexpr float columnThirdItemY  = columnFirstY - 2 * (columnItemSize + columnItemDis);
-constexpr float columnFourthItemY = columnFirstY - 3 * (columnItemSize + columnItemDis);
-constexpr float columnFifthItemY  = columnFirstY - 4 * (columnItemSize + columnItemDis);
-
-constexpr SDL_FRect pkgFRect  = {columnX, columnFirstY, columnItemSize, columnItemSize};
-constexpr SDL_FRect sinkFRect = {columnX, columnSecondItemY, columnItemSize, columnItemSize};
-constexpr SDL_FRect binFRect  = {columnX, columnThirdItemY, columnItemSize, columnItemSize};
-
-constexpr float leftBarBegin            = SCREEN_WIDTH > 800 ? 20.f : 0.f;
-constexpr SDL_FRect potToolFRect        = {leftBarBegin, columnThirdItemY, columnItemSize, columnItemSize};
-constexpr SDL_FRect chopsticksToolFRect = {leftBarBegin, columnSecondItemY, columnItemSize, columnItemSize};
-constexpr SDL_FRect bowlsFRect          = {leftBarBegin, columnFirstY, columnItemSize, columnItemSize};
-
-constexpr float cookerSize = 128.f + 10.f * SCREEN_HEIGHT / 600.f;
-constexpr float cookerY = SCREEN_HEIGHT - cookerSize - (columnItemSize - columnItemDis) * (SCREEN_HEIGHT - 600) / 600.f;
-
-constexpr SDL_FRect cookerFDst1 = {SCREEN_WIDTH * 0.5f - 2.f * cookerSize, cookerY, cookerSize, cookerSize};
+constexpr SDL_FRect cookerFDst1 = {HALF_WIDTH - 2.f * cookerSize, cookerY, cookerSize, cookerSize};
 constexpr SDL_FRect cookerFDst2 = {cookerFDst1.x + cookerSize, cookerY, cookerSize, cookerSize};
 constexpr SDL_FRect cookerFDst3 = {cookerFDst2.x + cookerSize, cookerY, cookerSize, cookerSize};
 constexpr SDL_FRect cookerFDst4 = {cookerFDst3.x + cookerSize, cookerY, cookerSize, cookerSize};
-constexpr float potSizeCooking  = cookerSize;
-constexpr float potYCooking     = cookerY - potSizeCooking * 0.4f;
-constexpr SDL_FRect potFDst1    = {cookerFDst1.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
-constexpr SDL_FRect potFDst2    = {cookerFDst2.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
-constexpr SDL_FRect potFDst3    = {cookerFDst3.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
-constexpr SDL_FRect potFDst4    = {cookerFDst4.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+
+constexpr float columnSecondItemY = columnFirstY - appliancesSize - itemDis;
+constexpr float columnThirdItemY  = columnFirstY - 2 * (appliancesSize + itemDis);
+constexpr float columnFourthItemY = columnFirstY - 3 * (appliancesSize + itemDis);
+constexpr float columnFifthItemY  = columnFirstY - 4 * (appliancesSize + itemDis);
+;
+
+constexpr SDL_FRect sinkFRect = {HALF_WIDTH, counterHeight + counterRect.h, appliancesSize, appliancesSize};
+constexpr SDL_FRect binFRect  = {HALF_WIDTH + itemDis + appliancesSize, counterHeight + counterRect.h, appliancesSize,
+                                 appliancesSize};
+
+constexpr float cookingToolX            = HALF_WIDTH * 0.5f;
+constexpr float cookingToolY            = cookerY + cookerSize + itemDis;
+constexpr SDL_FRect pkgFRect            = {cookingToolX, cookingToolY, cookingToolSize, cookingToolSize};
+constexpr SDL_FRect potToolFRect        = {pkgFRect.x + cookingToolSize + itemDis, cookingToolY, cookingToolSize,
+                                           cookingToolSize};
+constexpr SDL_FRect chopsticksToolFRect = {potToolFRect.x + cookingToolSize + itemDis, cookingToolY, cookingToolSize,
+                                           cookingToolSize};
+constexpr SDL_FRect bowlsFRect = {chopsticksToolFRect.x + cookingToolSize + itemDis, cookingToolY, cookingToolSize,
+                                  cookingToolSize};
+
+constexpr SDL_FRect potFDst1 = {cookerFDst1.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst2 = {cookerFDst2.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst3 = {cookerFDst3.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
+constexpr SDL_FRect potFDst4 = {cookerFDst4.x + 10.f, potYCooking, potSizeCooking, potSizeCooking};
 
 constexpr SDL_FRect servingSlotFDst1 = {cust1FRect.x + cusSize * 0.3f, cust1FRect.y + cusSize * 0.7f, 80, 80};
 

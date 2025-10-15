@@ -4,6 +4,7 @@
 #include "sound.h"
 #include "imageTexture.h"
 
+using namespace std::chrono_literals;
 RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx) noexcept
     : m_elemId(id)
     , m_frect(getCookingSlotFRect(id))
@@ -50,7 +51,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::CHOPSTICKS: {
-        if (elemId == elemId) {
+        if (elemId == m_elemId) {
             m_state      = RamenState::HALF_COOKED;
             m_stateStart = m_tick;
         } else {
@@ -88,7 +89,6 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
 }
 
 void RamenCooking::toggleAmplify(std::chrono::milliseconds tick) noexcept {
-    using namespace std::chrono_literals;
     if ((tick - m_showStateStart) > 500ms) {
         m_amplify        = !m_amplify;
         m_showStateStart = tick;
@@ -96,7 +96,6 @@ void RamenCooking::toggleAmplify(std::chrono::milliseconds tick) noexcept {
 }
 
 void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
-    using namespace std::chrono_literals;
     switch (m_state) {
     case RamenState::POT_IN_PLACE: {
         if ((tick - m_stateStart) > 2s) {
@@ -106,7 +105,8 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
             m_stateStart = tick;
         }
     } break;
-    case RamenState::WATER_BOILING: {
+    case RamenState::WATER_BOILING:
+    case RamenState::NOODLES_CAPTURED: {
         toggleAmplify(tick);
         m_stateStart = tick;
     } break;
@@ -223,4 +223,13 @@ void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
     default:
         break;
     }
+}
+
+void RamenCooking::handleCycleStart() noexcept {}
+void RamenCooking::handleCycleEnd() noexcept {
+    m_amplify        = false;
+    m_state          = RamenState::IDLE;
+    m_tick           = 0ms;
+    m_stateStart     = 0ms;
+    m_showStateStart = 0ms;
 }

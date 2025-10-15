@@ -6,9 +6,6 @@
 
 struct Element;
 using updateFunc = Delegate<void(Element&, const SDL_FPoint&, uint32_t, ImageId)>;
-
-enum class Interaction { none, hover, down, click };
-
 struct Element {
     Element(SDL_FRect rect, ElementId id, ImageId imId, bool hover = false, bool defaultVisible = false)
         : fpos(rect)

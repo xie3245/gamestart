@@ -32,6 +32,8 @@ public:
     RamenCooking(ElementId id, const AudioMixer& mx) noexcept;
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
+    void handleCycleStart() noexcept;
+    void handleCycleEnd() noexcept;
     void show(const Renderer& rend, float x, float y) const noexcept;
 
 private:

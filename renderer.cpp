@@ -34,6 +34,12 @@ SDL_Texture* Renderer::loadTexture(SDL_Surface* surf) const {
     return tex;
 }
 
+void Renderer::renderLine(float x1, float y1, float x2, float y2) const noexcept {
+    if (!SDL_RenderLine(m_renderer, x1, y1, x2, y2)) {
+        std::cerr << __func__ << " failed: " << SDL_GetError() << "\n";
+    }
+}
+
 void Renderer::captureFrame() const noexcept {
     SDL_Surface* surface = SDL_RenderReadPixels(m_renderer, nullptr);
     char filename[64];
