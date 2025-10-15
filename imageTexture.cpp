@@ -1,5 +1,4 @@
 #include "imageTexture.h"
-#include "utils.h"
 
 ImageTexture::ImageTexture(const char* path_to_img) noexcept
     : m_surface(IMG_Load(path_to_img), SDL_DestroySurface)

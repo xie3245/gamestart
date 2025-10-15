@@ -1,6 +1,5 @@
 #include "ramenCooking.h"
 #include "ui.h"
-#include "utils.h"
 #include "sound.h"
 #include "imageTexture.h"
 

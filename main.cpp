@@ -4,7 +4,6 @@
 #include <SDL3_mixer/SDL_mixer.h>
 #include "ramenCooking.h"
 #include "ui.h"
-#include "utils.h"
 #include "sound.h"
 #include "imageTexture.h"
 #include "element.h"
@@ -64,7 +63,8 @@ int main(int argc, char* argv[]) {
 
     FontTexture clkTexture{};
 
-    bool quit = false;
+    bool quit   = false;
+    bool paused = false;
 
     RamenCooking slots[]{RamenCooking{ElementId::cookingSlot1, mx}, RamenCooking{ElementId::cookingSlot2, mx},
                          RamenCooking{ElementId::cookingSlot3, mx}, RamenCooking{ElementId::cookingSlot4, mx}};
@@ -92,6 +92,8 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_EVENT_QUIT || (e.key.key == SDLK_ESCAPE)) {
                 quit = true;
                 break;
+            } else if (e.key.down && (e.key.key == SDLK_SPACE)) {
+                paused = !paused;
             } else if (isMouse(e)) {
                 // std::cout << e.type << " " << e.button.x << " " << e.button.y << std::endl;
                 ElementId selected = ElementId::undefined;
@@ -112,8 +114,10 @@ int main(int argc, char* argv[]) {
                 handleHover(selected, mousePoint);
             }
         }
-        auto now   = std::chrono::milliseconds(SDL_GetTicks());
-        gameClk    = std::min(gameClk + (now - prevSysClk), cycleDuration);
+        auto now = std::chrono::milliseconds(SDL_GetTicks());
+        if (!paused) {
+            gameClk = std::min(gameClk + (now - prevSysClk), cycleDuration);
+        }
         prevSysClk = now;
 
         for (RamenCooking& r : slots) {
