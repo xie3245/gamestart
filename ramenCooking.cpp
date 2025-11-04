@@ -1,234 +1,165 @@
 #include "ramenCooking.h"
 #include "ui.h"
+#include "globals.h"
 #include "sound.h"
-#include "imageTexture.h"
+#include "element.h"
 
 using namespace std::chrono_literals;
+
 RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx) noexcept
     : m_elemId(id)
     , m_frect(getCookingSlotFRect(id))
     , m_state(RamenState::IDLE)
-    , m_mixer(mx) {}
+    , m_mixer(mx)
+    , m_vis(m_elemId) {}
 
 void RamenCooking::handleClick(ElementId elemId) noexcept {
     switch (m_state) {
     case RamenState::IDLE: {
-        if ((elemId == ElementId::potSideBar) && !isServing()) {
-            m_state = RamenState::EMPTY;
-        }
-    } break;
-    case RamenState::EMPTY: {
-        if ((elemId == ElementId::sinkSideBar)) {
-            m_state = RamenState::WATER_ADDED;
-        } else {
-            m_state = RamenState::IDLE;
-        }
-    } break;
-    case RamenState::WATER_ADDED: {
-        if ((elemId == m_elemId)) {
+        if ((elemId == m_elemId) && mouseItem() == ShowId::pot_water_added) {
             m_state = RamenState::POT_IN_PLACE;
-        } else {
-            m_state = RamenState::IDLE;
+            m_vis.stateChanged(RamenState::POT_IN_PLACE);
+            clearMouseItem();
         }
     } break;
     case RamenState::WATER_BOILING: {
-        if (elemId == ElementId::ramenSideBar) {
-            m_state = RamenState::NOODLES_CAPTURED;
+        if ((elemId == m_elemId) && mouseItem() == ShowId::ramenPkg) {
+            m_state = RamenState::NOODLES_ADDED;
+            m_vis.stateChanged(RamenState::NOODLES_ADDED);
+            clearMouseItem();
         }
     } break;
-    case RamenState::NOODLES_CAPTURED: {
-        if ((elemId == m_elemId)) {
-            m_state   = RamenState::NOODLES_ADDED;
-            m_amplify = false;
-        } else {
-            m_state = RamenState::WATER_BOILING;
-        }
-    } break;
-    case RamenState::COOKING: {
-        if (elemId == ElementId::chopsticksSideBar) {
-            m_state = RamenState::CHOPSTICKS;
-        }
-    } break;
-    case RamenState::CHOPSTICKS: {
-        if (elemId == m_elemId) {
-            m_state      = RamenState::HALF_COOKED;
-            m_stateStart = m_tick;
-        } else {
-            m_state = RamenState::COOKING;
-        }
-    } break;
-    case RamenState::COOKED: {
-        if (elemId == ElementId::bowlsSideBar) {
-            m_state = RamenState::SERVING;
+    case RamenState::TO_STIR: {
+        if ((elemId == m_elemId) && (mouseItem() == ShowId::chopsticks1)) {
+            m_state = RamenState::HALF_COOKED;
+            m_vis.stateChanged(RamenState::HALF_COOKED);
+            clearMouseItem();
+            m_tick = getGameClk();
         }
     } break;
     case RamenState::BURNT: {
-        if (elemId == m_elemId) {
-            m_state = RamenState::GOING_TO_TRASH;
+        if ((elemId == m_elemId)) {
+            if (attachToMouse(m_elemId, ShowId::pot_burnt)) {
+                m_state = RamenState::IDLE;
+                m_vis.stateChanged(RamenState::IDLE);
+            }
         }
     } break;
-    case RamenState::SERVING: {
-        if (elemId == m_elemId) {
-            m_state = RamenState::GOING_TO_CUSTOMER;
-            setServing(true);
-        } else {
-            m_state = RamenState::COOKED;
-        }
-    } break;
-    case RamenState::GOING_TO_TRASH: {
-        if (elemId == ElementId::binSideBar) {
+    case RamenState::COOKED: {
+        if ((elemId == m_elemId) && (mouseItem() == ShowId::empty_bowl)) {
             m_state = RamenState::IDLE;
-        } else {
-            m_state = RamenState::BURNT;
+            m_vis.stateChanged(RamenState::IDLE);
+            attachToMouse(m_elemId, ShowId::bowl_with_ramen_plain);
         }
     } break;
     default:
         break;
-    }
-}
-
-void RamenCooking::toggleAmplify(std::chrono::milliseconds tick) noexcept {
-    if ((tick - m_showStateStart) > 500ms) {
-        m_amplify        = !m_amplify;
-        m_showStateStart = tick;
     }
 }
 
 void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
+    m_vis.handleTick(tick);
     switch (m_state) {
     case RamenState::POT_IN_PLACE: {
-        if ((tick - m_stateStart) > 2s) {
-            m_state          = RamenState::WATER_BOILING;
-            m_showStateStart = tick;
+        if ((tick - m_tick) > 2s) {
+            m_state = RamenState::WATER_BOILING;
+            m_vis.stateChanged(RamenState::WATER_BOILING);
             m_mixer.play(SoundId::water_boiling);
-            m_stateStart = tick;
+            m_tick = tick;
         }
-    } break;
-    case RamenState::WATER_BOILING:
-    case RamenState::NOODLES_CAPTURED: {
-        toggleAmplify(tick);
-        m_stateStart = tick;
     } break;
     case RamenState::NOODLES_ADDED: {
-        if ((tick - m_stateStart) > 3s) {
-            m_state      = RamenState::COOKING;
-            m_stateStart = tick;
+        if ((tick - m_tick) > 3s) {
+            m_state = RamenState::TO_STIR;
+            m_vis.stateChanged(RamenState::TO_STIR);
+            m_tick = tick;
         }
     } break;
-    case RamenState::COOKING:
-    case RamenState::CHOPSTICKS: {
-        toggleAmplify(tick);
-        if ((tick - m_stateStart) > 5s) {
+    case RamenState::TO_STIR: {
+        if ((tick - m_tick) > 5s) {
             m_state = RamenState::BURNT;
+            m_vis.stateChanged(RamenState::BURNT);
         }
     } break;
     case RamenState::HALF_COOKED: {
-        if ((tick - m_stateStart) > 3s) {
-            m_state      = RamenState::COOKED;
-            m_stateStart = tick;
+        if ((tick - m_tick) > 3s) {
+            m_state = RamenState::COOKED;
+            m_vis.stateChanged(RamenState::COOKED);
+            m_tick = tick;
         }
     } break;
-    case RamenState::COOKED:
-    case RamenState::SERVING: {
-        toggleAmplify(tick);
-        if ((tick - m_stateStart) > 5s) {
+    case RamenState::COOKED: {
+        if ((tick - m_tick) > 5s) {
             m_state = RamenState::BURNT;
-        }
-    } break;
-    case RamenState::GOING_TO_CUSTOMER: {
-        if (!isServing()) {
-            m_state = RamenState::IDLE;
+            m_vis.stateChanged(RamenState::BURNT);
         }
     } break;
     default:
-        m_stateStart = tick;
+        m_tick = tick;
         break;
-    }
-    m_tick = tick;
-}
-
-void RamenCooking::showPulsingZoom(const Renderer& rend, ImageId id) const noexcept {
-    if (m_amplify) {
-        getImage(id).show(rend, m_frect, 1.1f);
-    } else {
-        getImage(id).show(rend, m_frect);
     }
 }
 
-void RamenCooking::show(const Renderer& rend, float x, float y) const noexcept {
-    switch (m_state) {
-    case RamenState::EMPTY:
-        getImage(ImageId::empty_pot).show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
-        break;
-    case RamenState::WATER_ADDED:
-        getImage(ImageId::pot_water_added)
-            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
-        break;
-    case RamenState::POT_IN_PLACE:
-        getImage(ImageId::pot_water_added).show(rend, m_frect);
-        break;
-    case RamenState::WATER_BOILING: {
-        showPulsingZoom(rend, ImageId::pot_water_boiling);
+void CookingPotVisualizer::stateChanged(RamenState changedTo) noexcept {
+    Element& elem = getElement(m_elemId);
+    switch (changedTo) {
+    case RamenState::POT_IN_PLACE: {
+        elem.visible = true;
+        elem.showId   = ShowId::pot_water_added;
     } break;
-    case RamenState::NOODLES_CAPTURED: {
-        showPulsingZoom(rend, ImageId::pot_water_boiling);
-        getImage(ImageId::ramenPkg).show(rend, {x - pkgFRect.w * 0.5f, y - pkgFRect.h * 0.5f, pkgFRect.w, pkgFRect.h});
+    case RamenState::WATER_BOILING: {
+        elem.showId = ShowId::pot_water_boiling;
     } break;
     case RamenState::NOODLES_ADDED:
-        getImage(ImageId::pot_noodle_added).show(rend, m_frect);
+        elem.showId = ShowId::pot_noodle_added;
         break;
-    case RamenState::COOKING:
-        showPulsingZoom(rend, ImageId::pot_noodle_cooking);
-        if (m_amplify) {
-            getImage(ImageId::puff)
-                .show(rend, {m_frect.x - 0.05f * m_frect.w, m_frect.y - 30 - 0.05f * m_frect.h, 80.f, 80.f});
-        } else {
-            getImage(ImageId::puff).show(rend, {m_frect.x, m_frect.y - 30, 80.f, 80.f});
-        }
-        break;
-    case RamenState::CHOPSTICKS:
-        showPulsingZoom(rend, ImageId::pot_noodle_cooking);
-        if (m_amplify) {
-            getImage(ImageId::puff)
-                .show(rend, {m_frect.x - 0.05f * m_frect.w, m_frect.y - 30 - 0.05f * m_frect.h, 80.f, 80.f});
-        } else {
-            getImage(ImageId::puff).show(rend, {m_frect.x, m_frect.y - 30, 80.f, 80.f});
-        }
-        getImage(ImageId::chopsticks1)
-            .show(rend, {x - chopsticksToolFRect.w * 0.5f, y - chopsticksToolFRect.h * 0.5f, chopsticksToolFRect.w,
-                         chopsticksToolFRect.h});
+    case RamenState::TO_STIR:
+        elem.showId                           = ShowId::pot_noodle_cooking;
+        getElement(puffId(m_elemId)).visible = true;
+
         break;
     case RamenState::HALF_COOKED:
-        getImage(ImageId::pot_noodle_halfcooked).show(rend, m_frect);
+        elem.showId                           = ShowId::pot_noodle_halfcooked;
+        getElement(puffId(m_elemId)).visible = false;
         break;
     case RamenState::COOKED:
-        showPulsingZoom(rend, ImageId::pot_noodle_cooked);
+        elem.showId = ShowId::pot_noodle_cooked;
         break;
     case RamenState::BURNT:
-        getImage(ImageId::pot_burnt).show(rend, m_frect);
-        break;
-    case RamenState::SERVING:
-        showPulsingZoom(rend, ImageId::pot_noodle_cooked);
-        getImage(ImageId::empty_bowl)
-            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h}, 0.8f);
-        break;
-    case RamenState::GOING_TO_TRASH:
-        getImage(ImageId::pot_burnt).show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
-        break;
-    case RamenState::GOING_TO_CUSTOMER:
-        getImage(ImageId::bowl_with_ramen_plain)
-            .show(rend, {x - m_frect.w * 0.5f, y - m_frect.h * 0.5f, m_frect.w, m_frect.h});
+        elem.showId                           = ShowId::pot_burnt;
+        getElement(puffId(m_elemId)).visible = false;
         break;
     default:
+        elem.visible                         = false;
+        getElement(puffId(m_elemId)).visible = false;
         break;
     }
+    m_state = changedTo;
 }
 
-void RamenCooking::handleCycleStart() noexcept {}
-void RamenCooking::handleCycleEnd() noexcept {
-    m_amplify        = false;
-    m_state          = RamenState::IDLE;
-    m_tick           = 0ms;
-    m_stateStart     = 0ms;
-    m_showStateStart = 0ms;
+void CookingPotVisualizer::handleTick(std::chrono::milliseconds tick) noexcept {
+    switch (m_state) {
+    case RamenState::WATER_BOILING:
+    case RamenState::TO_STIR:
+    case RamenState::COOKED: {
+        if (tick - m_tick > 500ms) {
+            Element& elem = getElement(m_elemId);
+            if (m_toggle) {
+                elem.ratio = (1.f + potZoomDiff);
+                m_toggle   = false;
+            } else {
+                elem.ratio = 1.f;
+                m_toggle   = true;
+            }
+            m_tick = tick;
+        }
+    } break;
+    default:
+        m_tick = tick;
+        break;
+    }
+
+    if (m_state == RamenState::TO_STIR) {
+        getElement(puffId(m_elemId)).fpos = getPuffFRect(m_elemId, m_toggle);
+    }
 }

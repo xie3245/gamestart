@@ -1,62 +1,78 @@
 #include "sidebar.h"
 #include "element.h"
 #include "sound.h"
+#include "globals.h"
 
 using namespace std::chrono_literals;
+
+struct ClickEvents final {
+    ElementId toClick;
+    ElementId attachRequireOnMouse = ElementId::undefined;
+    ElementId attachForbidOnMouse  = ElementId::undefined;
+};
+
+struct ImageWhenClicked final {
+    ElementId elem;
+    ShowId imgOrig;
+    ShowId imgClicked;
+    std::chrono::milliseconds resetTime = 0ms;
+};
+
+struct AttachWhenClicked final {
+    ElementId elem;
+    ShowId itemId;
+};
+
+struct SoundWhenClicked final {
+    ElementId elem;
+    SoundId sound;
+};
+
+static ImageWhenClicked clickImgs[]{{ElementId::binSideBar, ShowId::bin, ShowId::bin_open},
+                                    {ElementId::sinkSideBar, ShowId::sink, ShowId::sink_running_water}};
+
+static constexpr AttachWhenClicked attachElems[]{{ElementId::bowlsSideBar, ShowId::empty_bowl},
+                                                 {ElementId::chopsticksSideBar, ShowId::chopsticks1},
+                                                 {ElementId::potSideBar, ShowId::empty_pot},
+                                                 {ElementId::ramenSideBar, ShowId::ramenPkg},
+                                                 {ElementId::sinkSideBar, ShowId::pot_water_added}};
+
+static constexpr SoundWhenClicked soundElems[]{{ElementId::binSideBar, SoundId::bin_open},
+                                               {ElementId::sinkSideBar, SoundId::running_water}};
+
 void SideBar::handleClick(ElementId elemId) noexcept {
-    if (!sinkClicked && elemId == ElementId::sinkSideBar) {
-        auto sink = std::find_if(std::begin(m_elemsView), std::end(m_elemsView),
-                                 [](const Element& e) { return e.elemId == ElementId::sinkSideBar; });
-        if (sink != std::end(m_elemsView)) {
-            sink->imgId = ImageId::sink_running_water;
-            sink->ratio = 1.5f;
-        }
-        sinkClicked = true;
-        m_mixer.play(SoundId::running_water);
+    auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs),
+                            [elemId](const ImageWhenClicked& e) { return e.elem == elemId; });
+    if (img != std::end(clickImgs)) {
+        getElement(elemId).showId = img->imgClicked;
+        img->resetTime            = m_tick + 500ms;
     }
 
-    if (!binClicked && elemId == ElementId::binSideBar) {
-        auto bin = std::find_if(std::begin(m_elemsView), std::end(m_elemsView),
-                                [](const Element& e) { return e.elemId == ElementId::binSideBar; });
-        if (bin != std::end(m_elemsView)) {
-            bin->imgId = ImageId::bin_open;
-            bin->ratio = 1.5f;
-        }
-        binClicked = true;
-        m_mixer.play(SoundId::bin_open);
+    auto attach = std::find_if(std::begin(attachElems), std::end(attachElems),
+                               [elemId](const AttachWhenClicked& e) { return e.elem == elemId; });
+    if (attach != std::end(attachElems)) {
+        attachToMouse(attach->elem, attach->itemId);
+    }
+
+    auto sd = std::find_if(std::begin(soundElems), std::end(soundElems),
+                           [elemId](const SoundWhenClicked& e) { return e.elem == elemId; });
+    if (sd != std::end(soundElems)) {
+        m_mixer.play(sd->sound);
+    }
+
+    if (elemId == ElementId::binSideBar) {
+        clearMouseItem();
     }
 }
 
 void SideBar::handleTick(std::chrono::milliseconds tick) noexcept {
-    using namespace std::chrono_literals;
-    if (sinkClicked) {
-        if ((tick - sinkStart) > 500ms) {
-            auto itr = std::find_if(std::begin(m_elemsView), std::end(m_elemsView),
-                                    [](const Element& e) { return e.elemId == ElementId::sinkSideBar; });
-            if (itr != std::end(m_elemsView)) {
-                itr->imgId = ImageId::sink;
-                itr->ratio = 1.f;
-            }
-            sinkClicked = false;
-        }
-    } else {
-        sinkStart = tick;
-    }
+    m_tick   = tick;
+    auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs), [tick](const ImageWhenClicked& e) {
+        return (e.resetTime != 0ms) && (tick >= e.resetTime);
+    });
 
-    if (binClicked) {
-        if ((tick - binStart) > 500ms) {
-            auto itr = std::find_if(std::begin(m_elemsView), std::end(m_elemsView),
-                                    [](const Element& e) { return e.elemId == ElementId::binSideBar; });
-            if (itr != std::end(m_elemsView)) {
-                itr->imgId = ImageId::bin;
-                itr->ratio = 1.f;
-            }
-            binClicked = false;
-        }
-    } else {
-        binStart = tick;
+    if (img != std::end(clickImgs)) {
+        getElement(img->elem).showId = img->imgOrig;
+        img->resetTime               = 0ms;
     }
 }
-
-void SideBar::handleCycleStart() noexcept {}
-void SideBar::handleCycleEnd() noexcept {}

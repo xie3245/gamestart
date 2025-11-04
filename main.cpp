@@ -5,33 +5,22 @@
 #include "ramenCooking.h"
 #include "ui.h"
 #include "sound.h"
-#include "imageTexture.h"
 #include "element.h"
 #include "customer.h"
 #include <algorithm>
-#include "stats.h"
 #include "sidebar.h"
+#include "globals.h"
+#include "renderer.h"
 
 using namespace std::chrono_literals;
-Element all[] = {{potToolFRect, ElementId::potSideBar, ImageId::empty_pot, true, true},
-                 {pkgFRect, ElementId::ramenSideBar, ImageId::ramenPkg, true, true},
-                 {sinkFRect, ElementId::sinkSideBar, ImageId::sink, true, true},
-                 {binFRect, ElementId::binSideBar, ImageId::bin, true, true},
-                 {bowlsFRect, ElementId::bowlsSideBar, ImageId::bowls, true, true},
-                 {chopsticksToolFRect, ElementId::chopsticksSideBar, ImageId::chopsticks2, true, true},
-                 {potFDst1, ElementId::cookingSlot1, ImageId::empty_pot},
-                 {potFDst2, ElementId::cookingSlot2, ImageId::empty_pot},
-                 {potFDst3, ElementId::cookingSlot3, ImageId::empty_pot},
-                 {potFDst4, ElementId::cookingSlot4, ImageId::empty_pot},
-                 {cust1FRect, ElementId::customer1, ImageId::customer1},
-                 {cust2FRect, ElementId::customer2, ImageId::customer1},
-                 {cust3FRect, ElementId::customer3, ImageId::customer1},
-                 {cust4FRect, ElementId::customerRightMost, ImageId::customer1}};
+static std::chrono::milliseconds gameClk = 0ms;
 
-void handleHover(ElementId clicked, const SDL_FPoint& mousePoint) noexcept {
+std::chrono::milliseconds getGameClk() noexcept { return gameClk; }
+
+void handleHover(std::span<Element> all, ElementId clicked, const SDL_FPoint& mousePoint) noexcept {
     static auto hovered = std::end(all);
     auto current_hover  = std::find_if(std::begin(all), std::end(all), [&](const Element& e) {
-        return e.hoverable && SDL_PointInRectFloat(&mousePoint, &e.fpos);
+        return e.visible && e.hoverable && SDL_PointInRectFloat(&mousePoint, &e.fpos);
     });
 
     if (current_hover != std::end(all) && current_hover->elemId != clicked) {
@@ -55,34 +44,25 @@ int main(int argc, char* argv[]) {
     static AudioMixer mx{};
     mx.play(SoundId::bgm, -1, 0.3f);
 
-    // Load textures
-    const ImageTexture& bgTexture      = getImage(ImageId::bg);
-    const ImageTexture& counterTexture = getImage(ImageId::counter_surface);
-    const ImageTexture& burnerTexture  = getImage(ImageId::burner);
-    // const ImageTexture& fridgeTexture  = getImage(ImageId::fridge);
+    auto all = getActiveElements();
 
-    FontTexture clkTexture{};
-
-    bool quit   = false;
-    bool paused = false;
-
+    bool quit = false;
     RamenCooking slots[]{RamenCooking{ElementId::cookingSlot1, mx}, RamenCooking{ElementId::cookingSlot2, mx},
                          RamenCooking{ElementId::cookingSlot3, mx}, RamenCooking{ElementId::cookingSlot4, mx}};
 
-    SideBar sideBar{mx, std::span(all)};
+    SideBar sideBar{mx};
 
     Customer customers[] = {{mx, ElementId::customer1},
                             {mx, ElementId::customer2},
                             {mx, ElementId::customer3},
                             {mx, ElementId::customerRightMost}};
-    Money money{};
 
-    constexpr std::chrono::milliseconds cycleDuration = 2min;
-    std::chrono::milliseconds gameClk{0};
+    constexpr std::chrono::milliseconds cycleDuration = 10min;
     std::chrono::milliseconds prevSysClk{0};
     SDL_Event e;
     // auto captured = 0ms;
     while (!quit) {
+        all = getActiveElements();
         SDL_FPoint mousePoint;
         while (SDL_PollEvent(&e)) {
             // std::cout << "type: " << e.type << "code: " << e.key.key << std::endl;
@@ -92,92 +72,93 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_EVENT_QUIT || (e.key.key == SDLK_ESCAPE)) {
                 quit = true;
                 break;
-            } else if (e.key.down && (e.key.key == SDLK_SPACE)) {
-                paused = !paused;
+            } else if (e.type == SDL_EVENT_KEY_DOWN) {
+                if (e.key.key == SDLK_SPACE) {
+                    if (!isOverlay()) {
+                        togglePause();
+                    }
+                } else if (e.key.key == SDLK_LCTRL) {
+                    toggleOverlay();
+                }
             } else if (isMouse(e)) {
                 // std::cout << e.type << " " << e.button.x << " " << e.button.y << std::endl;
+
                 ElementId selected = ElementId::undefined;
                 if (isClick(e)) {
                     auto clicked = std::find_if(std::begin(all), std::end(all), [&](const Element& e) {
-                        return SDL_PointInRectFloat(&mousePoint, &e.fpos);
+                        return e.clickable && SDL_PointInRectFloat(&mousePoint, &e.fpos);
                     });
 
                     selected = clicked == std::end(all) ? ElementId::undefined : clicked->elemId;
-                    sideBar.handleClick(selected);
-                    for (RamenCooking& r : slots) {
-                        r.handleClick(selected);
-                    }
-                    for (Customer& cus : customers) {
-                        cus.handleClick(selected);
+
+                    if (selected == ElementId::okayButton) {
+                        cycleStarts();
+                    } else {
+                        sideBar.handleClick(selected);
+                        for (RamenCooking& r : slots) {
+                            r.handleClick(selected);
+                        }
+                        for (Customer& cus : customers) {
+                            cus.handleClick(selected);
+                        }
                     }
                 }
-                handleHover(selected, mousePoint);
+                handleHover(all, selected, mousePoint);
             }
         }
+
         auto now = std::chrono::milliseconds(SDL_GetTicks());
-        if (!paused) {
+
+        if (!isPaused()) {
             gameClk = std::min(gameClk + (now - prevSysClk), cycleDuration);
+            for (RamenCooking& r : slots) {
+                r.handleTick(gameClk);
+            }
+            sideBar.handleTick(gameClk);
+            for (Customer& cus : customers) {
+                cus.handleTick(gameClk);
+            }
         }
+
+        tickOverlay(now);
+
         prevSysClk = now;
 
-        for (RamenCooking& r : slots) {
-            r.handleTick(gameClk);
+        if (gameClk >= cycleDuration) {
+            gameClk = 0ms;
+            /*             for (RamenCooking& r : slots) {
+                            r.handleCycleEnd();
+                        }
+                        for (Customer& cus : customers) {
+                            cus.handleCycleEnd();
+                        } */
+            clearMouseItem();
+            cycleEnds();
         }
-        sideBar.handleTick(gameClk);
-        for (Customer& cus : customers) {
-            cus.handleTick(gameClk);
-        }
+
         renderer.clear();
-
-        // Draw background
-        bgTexture.show(renderer, bgDst);
-
-        clkTexture.show(renderer,
-                        std::to_string(std::chrono::duration_cast<std::chrono::seconds>(gameClk).count()) + "s",
-                        color::black, 800, 10);
-
-        for (Customer& cus : customers) {
-            cus.show(renderer);
-        }
-        // fridgeTexture.show(renderer, Sprite2x1::left, {800, 200, 400, 400});
-        counterTexture.show(renderer, counterRect);
-        for (Customer& cus : customers) {
-            cus.showItemsBeforeCounter(renderer);
-        }
-        burnerTexture.show(renderer, cookerFDst1);
-        burnerTexture.show(renderer, cookerFDst2);
-        burnerTexture.show(renderer, cookerFDst3);
-        burnerTexture.show(renderer, cookerFDst4);
 
         // Draw ramen package, sink
         for (const Element& elem : all) {
             if (elem.visible) {
-                const ImageTexture& img = getImage(elem.imgId);
-                img.show(renderer, elem.fpos, elem.ratio, elem.angle);
+                if (isText(elem.elemId)) {
+                    renderer.show(elem.showId, getText(elem.showId), elem.fpos.x, elem.fpos.y, elem.strikeThrough);
+                } else {
+                    renderer.show(elem.showId, elem.src, elem.fpos, elem.ratio, elem.angle);
+                }
             }
         }
-        // cooking slots
-        for (const RamenCooking& r : slots) {
-            r.show(renderer, mousePoint.x, mousePoint.y);
+
+        if (mouseItem() != ShowId::last) {
+            renderer.show(mouseItem(), {mousePoint.x - potSizeCooking * 0.5f, mousePoint.y - potSizeCooking * 0.5f,
+                                        potSizeCooking, potSizeCooking});
         }
-        money.show(renderer);
-        showRating(renderer);
 
         // if (now - captured > 500ms) {
         //     renderer.captureFrame();
         //     captured = now;
         // }
         renderer.update();
-        if (gameClk == cycleDuration) {
-            gameClk = 0ms;
-            for (RamenCooking& r : slots) {
-                r.handleCycleEnd();
-            }
-            for (Customer& cus : customers) {
-                cus.handleCycleEnd();
-            }
-            setServing(false);
-        }
     }
 
     return 0;

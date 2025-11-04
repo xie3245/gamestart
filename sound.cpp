@@ -1,5 +1,4 @@
 #include "sound.h"
-#include "utils.h"
 #include <iostream>
 
 using Audio = std::unique_ptr<MIX_Audio, void (*)(MIX_Audio*)>;

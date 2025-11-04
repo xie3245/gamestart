@@ -1,9 +1,11 @@
 #include "customer.h"
-#include "imageTexture.h"
+#include "element.h"
 #include "sound.h"
 #include <random>
 #include <cmath>
-#include "stats.h"
+#include "globals.h"
+#include "ui.h"
+#include "renderer.h"
 
 namespace {
 std::random_device rd{};
@@ -22,69 +24,53 @@ Customer::Customer(const AudioMixer& mx, ElementId id) noexcept
           std::lround(std::exponential_distribution<float>{customersPerMinute / 60000.f}(rng))))
     , m_mixer(mx)
     , m_id(id)
-    , m_imgId(toImgId(cusDistr(rng))) {}
+    , m_vis(m_id) {}
 
 void Customer::handleClick(ElementId clicked) noexcept {
     switch (m_state) {
-    case CustomerState::ordered:
-        if (isServing()) {
-            m_state = CustomerState::waiting;
-        }
-        break;
-    case CustomerState::waiting:
-        if (clicked == m_id) {
+    case CustomerState::ordered: {
+        if (clicked == m_id && (mouseItem() == ShowId::bowl_with_ramen_plain)) {
             m_state = CustomerState::eating;
+            m_vis.stateChanged(CustomerState::eating);
             m_mixer.play(SoundId::slurp);
-            setServing(false);
+            clearMouseItem();
             auto rating = ((m_tick - m_start) > (0.5f * waitTime)) ? 1 : 2;
             updateRating(rating);
-            m_toggleStart = m_tick;
-            m_start       = m_tick;
-        } else if (!isServing()) {
-            m_state = CustomerState::ordered;
+            m_start = m_tick;
         }
-        break;
+    } break;
     default:
         break;
     }
 }
 
 void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
+    m_vis.handleTick(tick);
     switch (m_state) {
     case CustomerState::undefined: {
         if (m_start < tick) {
             m_state = CustomerState::ordering;
+            m_vis.stateChanged(CustomerState::ordering);
             m_start = tick;
         }
     } break;
     case CustomerState::ordering: {
         if (tick - m_start > 1s) {
-            m_state = isServing() ? CustomerState::waiting : CustomerState::ordered;
+            m_state = CustomerState::ordered;
+            m_vis.stateChanged(CustomerState::ordered);
             m_start = tick;
         }
     } break;
     case CustomerState::ordered: {
         if ((tick - m_start) > waitTime) {
             m_state = CustomerState::leavingNotServed;
-            break;
-        }
-
-        if (isServing()) {
-            m_state = CustomerState::waiting;
-        }
-    } break;
-    case CustomerState::waiting: {
-        if ((tick - m_start) > waitTime) {
-            m_state = CustomerState::leavingNotServed;
+            m_vis.stateChanged(CustomerState::leavingNotServed);
         }
     } break;
     case CustomerState::eating: {
-        if ((tick - m_toggleStart) > 300ms) {
-            m_toggle      = !m_toggle;
-            m_toggleStart = tick;
-        }
         if (tick - m_start > 5s) {
             m_state = CustomerState::leavingServed;
+            m_vis.stateChanged(CustomerState::leavingServed);
             m_mixer.play(SoundId::burp);
             m_start = tick;
         }
@@ -92,106 +78,110 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
     case CustomerState::leavingServed: {
         if (tick - m_start > 1s) {
             m_state = CustomerState::undefined;
+            m_vis.stateChanged(CustomerState::undefined);
             m_start = tick + std::chrono::milliseconds(std::lround(intervalDistr(rng)));
-            m_imgId = toImgId(cusDistr(rng));
             m_mixer.play(SoundId::coins_collection);
             gainMoney(5);
         }
     } break;
     case CustomerState::leavingNotServed: {
         m_state = CustomerState::undefined;
+        m_vis.stateChanged(CustomerState::undefined);
         updateRating(0);
         m_start = tick + std::chrono::milliseconds(std::lround(intervalDistr(rng)));
-        m_imgId = toImgId(cusDistr(rng));
 
     } break;
     default:
-        m_toggleStart = tick;
-        m_start       = tick;
+        m_start = tick;
         break;
     }
     m_tick = tick;
 }
 
-SrcRations getBarOutline(float patience) noexcept {
+SrcRatio getBarOutline(float patience) noexcept {
     if (patience > 0.6f) {
-        return {Sprite2x3::upperRight};
+        return SrcRatio{Sprite2x3::upperRight};
     } else if (patience > 0.2f) {
-        return {Sprite2x3::middleRight};
+        return SrcRatio{Sprite2x3::middleRight};
     }
-    return {Sprite2x3::lowerRight};
+    return SrcRatio{Sprite2x3::lowerRight};
 }
 
-SrcRations getBarFilling(float patience) noexcept {
+SrcRatio getBarFilling(float patience) noexcept {
     if (patience > 0.6f) {
-        return {Sprite2x3::upperLeft, patience};
+        return SrcRatio{Sprite2x3::upperLeft, patience};
     } else if (patience > 0.2f) {
-        return {Sprite2x3::middleLeft, patience};
+        return SrcRatio{Sprite2x3::middleLeft, patience};
     }
-    return {Sprite2x3::lowerLeft, patience};
+    return SrcRatio{Sprite2x3::lowerLeft, patience};
 }
 
-void Customer::show(const Renderer& rend) const noexcept {
-    auto cusFRect = getCustSlotFRect(m_id);
-    switch (m_state) {
-    case CustomerState::eating:
-        if (m_toggle) {
-            getImage(m_imgId).show(rend, Sprite2x2::upperRight, cusFRect);
-        } else {
-            getImage(m_imgId).show(rend, Sprite2x2::lowerLeft, cusFRect);
-        }
-        break;
-    case CustomerState::leavingServed: {
-        getImage(m_imgId).show(rend, Sprite2x2::lowerRight, cusFRect);
+void CustomerVisualizer::stateChanged(CustomerState changedTo) noexcept {
+    switch (changedTo) {
+    case CustomerState::ordering: {
+        Element& elem  = getElement(m_elemId);
+        elem.visible   = true;
+        elem.clickable = true;
+        elem.showId    = toImgId(cusDistr(rng));
+        elem.src       = SrcRatio{Sprite2x2::upperLeft};
     } break;
-    case CustomerState::ordering:
-        getImage(m_imgId).show(rend, Sprite2x2::upperLeft, cusFRect);
-        break;
-    case CustomerState::ordered:
-    case CustomerState::waiting: {
-        getImage(m_imgId).show(rend, Sprite2x2::upperLeft, cusFRect);
-        float elapsed_ratio  = std::chrono::duration<float, std::milli>(m_tick - m_start) / waitTime;
-        float patience_ratio = 1.f - elapsed_ratio;
-        getImage(ImageId::patiencebar)
-            .show(rend, getBarOutline(patience_ratio), {cusFRect.x + 10, cusFRect.y, 10, cusFRect.h * 0.5f});
-        getImage(ImageId::patiencebar)
-            .show(rend, getBarFilling(patience_ratio),
-                  {cusFRect.x + 10, cusFRect.y, 10, cusFRect.h * 0.5f * patience_ratio});
-    } break;
-    default:
-        break;
-    }
-}
+    case CustomerState::ordered: {
+        getElement(orderId(m_elemId)).visible     = true;
+        getElement(orderTextId(m_elemId)).visible = true;
+        getElement(pbOut(m_elemId)).visible       = true;
+        getElement(pbOut(m_elemId)).src           = getBarOutline(1.f);
+        getElement(pbFill(m_elemId)).visible      = true;
+        getElement(pbFill(m_elemId)).src          = getBarFilling(1.f);
+        getElement(pbFill(m_elemId)).fpos.h       = patienceBarLength;
 
-void Customer::showItemsBeforeCounter(const Renderer& rend) const noexcept {
-    switch (m_state) {
-    case CustomerState::ordered:
-    case CustomerState::waiting: {
-        auto dst = getOrderSlotFRect(m_id);
-        getImage(ImageId::orderPostIt).show(rend, dst);
-        m_text.show(rend, "ramen", color::black, dst.x + orderTextIndentX, dst.y + orderTextIndentY);
-        // getImage(ImageId::ramenPkg).show(rend, {dst.x + orderTextIndentX, dst.y + orderTextIndentY, 50.f, 50.f});
     } break;
     case CustomerState::eating: {
-        getImage(ImageId::bowl_with_ramen_plain).show(rend, getServingSlotFRect(m_id));
-        auto dst = getOrderSlotFRect(m_id);
-        getImage(ImageId::orderPostIt).show(rend, dst);
-        m_text.show(rend, "ramen", color::black, dst.x + orderTextIndentX, dst.y + orderTextIndentY);
-        // getImage(ImageId::ramenPkg).show(rend, {dst.x + orderTextIndentX, dst.y + orderTextIndentY, 50.f, 50.f});
-        rend.renderLine(dst.x + orderTextIndentX, dst.y + orderTextIndentY + m_text.height() * 0.5f,
-                        dst.x + orderTextIndentX + m_text.width(), dst.y + orderTextIndentY + m_text.height() * 0.5f);
+        getElement(m_elemId).clickable                  = false;
+        getElement(pbOut(m_elemId)).visible             = false;
+        getElement(pbFill(m_elemId)).visible            = false;
+        getElement(servedItemId(m_elemId)).visible      = true;
+        getElement(orderTextId(m_elemId)).strikeThrough = true;
+        getElement(m_elemId).src                        = SrcRatio{Sprite2x2::upperRight};
     } break;
+    case CustomerState::leavingServed: {
+        getElement(m_elemId).src                        = SrcRatio{Sprite2x2::lowerRight};
+        getElement(servedItemId(m_elemId)).visible      = false;
+        getElement(orderId(m_elemId)).visible           = false;
+        getElement(orderTextId(m_elemId)).visible       = false;
+        getElement(orderTextId(m_elemId)).strikeThrough = false;
+    }
     default:
+        getElement(m_elemId).visible                    = false;
+        getElement(m_elemId).clickable                  = false;
+        getElement(orderId(m_elemId)).visible           = false;
+        getElement(servedItemId(m_elemId)).visible      = false;
+        getElement(pbOut(m_elemId)).visible             = false;
+        getElement(pbFill(m_elemId)).visible            = false;
+        getElement(orderTextId(m_elemId)).visible       = false;
+        getElement(orderTextId(m_elemId)).strikeThrough = false;
         break;
     }
+    m_state = changedTo;
 }
 
-void Customer::handleCycleStart() noexcept {}
-void Customer::handleCycleEnd() noexcept {
-    m_state       = CustomerState::undefined;
-    m_toggleStart = 0ms;
-    m_tick        = 0ms;
-    m_toggle      = false;
-    m_start       = std::chrono::milliseconds(std::lround(intervalDistr(rng)));
-    m_imgId       = toImgId(cusDistr(rng));
+void CustomerVisualizer::handleTick(std::chrono::milliseconds tick) noexcept {
+    if (m_state == CustomerState::ordered) {
+        float elapsed_ratio                 = std::chrono::duration<float, std::milli>(tick - m_tick) / waitTime;
+        float patience_ratio                = 1.f - elapsed_ratio;
+        getElement(pbOut(m_elemId)).src     = getBarOutline(patience_ratio);
+        getElement(pbFill(m_elemId)).src    = getBarFilling(patience_ratio);
+        getElement(pbFill(m_elemId)).fpos.h = patienceBarLength * patience_ratio;
+    } else if (m_state == CustomerState::eating) {
+        if ((tick - m_tick) > 300ms) {
+            if (m_toggle) {
+                getElement(m_elemId).src = SrcRatio{Sprite2x2::lowerLeft};
+            } else {
+                getElement(m_elemId).src = SrcRatio{Sprite2x2::upperRight};
+            }
+            m_toggle = !m_toggle;
+            m_tick   = tick;
+        }
+    } else {
+        m_tick = tick;
+    }
 }

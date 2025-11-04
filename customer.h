@@ -1,39 +1,36 @@
 #pragma once
 #include "elementId.h"
-#include "imageId.h"
 #include <chrono>
-#include "text.h"
 
-class CookingStatus;
 class Renderer;
 class AudioMixer;
+
+enum class CustomerState { undefined, ordering, ordered, eating, leavingServed, leavingNotServed };
+
+class CustomerVisualizer final {
+public:
+    explicit CustomerVisualizer(ElementId id) noexcept : m_elemId(id) {}
+    void stateChanged(CustomerState changedTo) noexcept;
+    void handleTick(std::chrono::milliseconds tick) noexcept;
+
+private:
+    ElementId m_elemId;
+    CustomerState m_state = CustomerState::undefined;
+    bool m_toggle         = false;
+    std::chrono::milliseconds m_tick;
+};
 
 class Customer final {
 public:
     Customer(const AudioMixer& mx, ElementId id) noexcept;
     void handleClick(ElementId clicked) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
-    void handleCycleStart() noexcept;
-    void handleCycleEnd() noexcept;
-    void show(const Renderer& rend) const noexcept;
-    void showItemsBeforeCounter(const Renderer& rend) const noexcept;
 
 private:
-    enum class CustomerState {
-        undefined,
-        ordering,
-        ordered,
-        waiting,
-        eating,
-        leavingServed,
-        leavingNotServed
-    } m_state = CustomerState::undefined;
-    std::chrono::milliseconds m_toggleStart;
+    CustomerState m_state = CustomerState::undefined;
     std::chrono::milliseconds m_start;
     std::chrono::milliseconds m_tick;
-    bool m_toggle = false;
     const AudioMixer& m_mixer;
     ElementId m_id;
-    ImageId m_imgId;
-    mutable FontTexture m_text;
+    CustomerVisualizer m_vis;
 };

@@ -1,7 +1,9 @@
 #pragma once
 
-enum class ImageId {
+enum class ShowId {
     bg = 0u,
+    operating_area,
+    blur,
     sink,
     sink_running_water,
     ramenPkg,
@@ -28,6 +30,9 @@ enum class ImageId {
     star,
     orderPostIt,
     fridge,
+    okayBtn,
+    newsOpen,
+    billPaper,
     customer0,
     customer1,
     customer2,
@@ -42,11 +47,16 @@ enum class ImageId {
     customer11,
     customer12,
     customer13,
-    customer14,
+    customerMax,
+    lastImg,
+    moneyNumberText,
+    plain_ramen_text,
     last
 };
 
-constexpr ImageId toImgId(int idx) noexcept {
-    auto diff = static_cast<int>(ImageId::customer0);
-    return static_cast<ImageId>(idx + diff);
+constexpr ShowId toImgId(int idx) noexcept {
+    auto diff = static_cast<int>(ShowId::customer0);
+    return static_cast<ShowId>(idx + diff);
 }
+
+constexpr bool isCustomer(ShowId id) noexcept { return (id >= ShowId::customer0) && (id <= ShowId::customerMax); }

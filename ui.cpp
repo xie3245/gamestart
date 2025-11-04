@@ -24,7 +24,3 @@ bool isClick(const SDL_Event& e) noexcept {
 
     return false;
 }
-
-static bool serving = false;
-bool isServing() noexcept { return serving; }
-void setServing(bool serve) noexcept { serving = serve; }
