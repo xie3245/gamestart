@@ -31,5 +31,11 @@ Element& getElement(ElementId id) noexcept;
 
 std::string getText(ShowId id) noexcept;
 
+void offerSoftdrinks() noexcept;
+void dismissSoftdrinks() noexcept;
+
+void showServed(ElementId cus, ShowId ramen, ShowId drink) noexcept;
+void hideServed(ElementId cus) noexcept;
+
 void cycleStarts() noexcept;
 void cycleEnds() noexcept;

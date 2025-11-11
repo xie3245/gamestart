@@ -8,8 +8,9 @@ enum class SoundId {
     slurp,
     burp,
     coins_collection,
-    achievement,
-    ding,
-    news,
+    fridge,
+    /*     achievement,
+        ding,
+        news, */
     undefined
 };

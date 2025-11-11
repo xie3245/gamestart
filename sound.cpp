@@ -34,12 +34,15 @@ AudioMixer::~AudioMixer() noexcept {
 
 void AudioMixer::play(SoundId id, int repetition, float gain_ratio) const noexcept {
     using namespace std::chrono_literals;
-    static SoundTrack allSoundTracks[] = {
-        {MIX_CreateTrack(m_mixer), SoundId::bgm, 5s},         {MIX_CreateTrack(m_mixer), SoundId::water_boiling},
-        {MIX_CreateTrack(m_mixer), SoundId::running_water},   {MIX_CreateTrack(m_mixer), SoundId::bin_open},
-        {MIX_CreateTrack(m_mixer), SoundId::slurp},           {MIX_CreateTrack(m_mixer), SoundId::burp},
-        {MIX_CreateTrack(m_mixer), SoundId::coins_collection}};
-
+    static SoundTrack allSoundTracks[] = {{MIX_CreateTrack(m_mixer), SoundId::bgm, 5s},
+                                          {MIX_CreateTrack(m_mixer), SoundId::water_boiling},
+                                          {MIX_CreateTrack(m_mixer), SoundId::running_water},
+                                          {MIX_CreateTrack(m_mixer), SoundId::bin_open},
+                                          {MIX_CreateTrack(m_mixer), SoundId::slurp},
+                                          {MIX_CreateTrack(m_mixer), SoundId::burp},
+                                          {MIX_CreateTrack(m_mixer), SoundId::coins_collection},
+                                          {MIX_CreateTrack(m_mixer), SoundId::fridge}};
+    static_assert(std::size(allSoundTracks) == static_cast<size_t>(SoundId::undefined));
     SoundTrack& track = allSoundTracks[static_cast<size_t>(id)];
     track.scaleVolume(gain_ratio);
     track.setRepetition(repetition);
@@ -54,7 +57,9 @@ MIX_Audio* getAudio(SoundId id) noexcept {
         {MIX_LoadAudio(nullptr, "assets/sounds/bin_open_sound.ogg", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/slurp.wav", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/burp.wav", false), MIX_DestroyAudio},
-        {MIX_LoadAudio(nullptr, "assets/sounds/coins.wav", false), MIX_DestroyAudio}};
+        {MIX_LoadAudio(nullptr, "assets/sounds/coins.wav", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/fridge.ogg", false), MIX_DestroyAudio}};
+    static_assert(std::size(allAudios) == static_cast<size_t>(SoundId::undefined));
     return allAudios[static_cast<size_t>(id)].get();
 }
 

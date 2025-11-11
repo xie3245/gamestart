@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
         for (const Element& elem : all) {
             if (elem.visible) {
                 if (isText(elem.elemId)) {
-                    renderer.show(elem.showId, getText(elem.showId), elem.fpos.x, elem.fpos.y, elem.strikeThrough);
+                    renderer.show(elem.showId, getText(elem.showId), elem.fpos.x, elem.fpos.y);
                 } else {
                     renderer.show(elem.showId, elem.src, elem.fpos, elem.ratio, elem.angle);
                 }

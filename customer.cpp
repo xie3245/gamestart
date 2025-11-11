@@ -24,19 +24,25 @@ Customer::Customer(const AudioMixer& mx, ElementId id) noexcept
           std::lround(std::exponential_distribution<float>{customersPerMinute / 60000.f}(rng))))
     , m_mixer(mx)
     , m_id(id)
-    , m_vis(m_id) {}
+    , m_vis(m_id, m_order, m_served) {}
 
 void Customer::handleClick(ElementId clicked) noexcept {
     switch (m_state) {
     case CustomerState::ordered: {
-        if (clicked == m_id && (mouseItem() == ShowId::bowl_with_ramen_plain)) {
-            m_state = CustomerState::eating;
-            m_vis.stateChanged(CustomerState::eating);
-            m_mixer.play(SoundId::slurp);
-            clearMouseItem();
-            auto rating = ((m_tick - m_start) > (0.5f * waitTime)) ? 1 : 2;
-            updateRating(rating);
-            m_start = m_tick;
+        if (clicked == m_id) {
+            if (m_order.has(mouseItem())) {
+                m_served.update(mouseItem());
+                clearMouseItem();
+            }
+
+            if (orderServed()) {
+                m_state = CustomerState::eating;
+                m_vis.stateChanged(CustomerState::eating);
+                m_mixer.play(SoundId::slurp);
+                auto rating = ((m_tick - m_start) > (0.5f * waitTime)) ? 1 : 2;
+                updateRating(rating);
+                m_start = m_tick;
+            }
         }
     } break;
     default:
@@ -52,11 +58,13 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
             m_state = CustomerState::ordering;
             m_vis.stateChanged(CustomerState::ordering);
             m_start = tick;
+            reset(m_served);
         }
     } break;
     case CustomerState::ordering: {
         if (tick - m_start > 1s) {
             m_state = CustomerState::ordered;
+            m_order = spawnOrder();
             m_vis.stateChanged(CustomerState::ordered);
             m_start = tick;
         }
@@ -98,6 +106,8 @@ void Customer::handleTick(std::chrono::milliseconds tick) noexcept {
     m_tick = tick;
 }
 
+bool Customer::orderServed() const noexcept { return m_order == m_served; }
+
 SrcRatio getBarOutline(float patience) noexcept {
     if (patience > 0.6f) {
         return SrcRatio{Sprite2x3::upperRight};
@@ -126,39 +136,40 @@ void CustomerVisualizer::stateChanged(CustomerState changedTo) noexcept {
         elem.src       = SrcRatio{Sprite2x2::upperLeft};
     } break;
     case CustomerState::ordered: {
-        getElement(orderId(m_elemId)).visible     = true;
-        getElement(orderTextId(m_elemId)).visible = true;
-        getElement(pbOut(m_elemId)).visible       = true;
-        getElement(pbOut(m_elemId)).src           = getBarOutline(1.f);
-        getElement(pbFill(m_elemId)).visible      = true;
-        getElement(pbFill(m_elemId)).src          = getBarFilling(1.f);
-        getElement(pbFill(m_elemId)).fpos.h       = patienceBarLength;
-
+        getElement(orderId(m_elemId)).visible          = true;
+        getElement(orderRamenId(m_elemId)).visible     = true;
+        getElement(orderSoftdrinkId(m_elemId)).visible = true;
+        getElement(orderSoftdrinkId(m_elemId)).showId  = m_order.drink;
+        getElement(pbOut(m_elemId)).visible            = true;
+        getElement(pbOut(m_elemId)).src                = getBarOutline(1.f);
+        getElement(pbFill(m_elemId)).visible           = true;
+        getElement(pbFill(m_elemId)).src               = getBarFilling(1.f);
+        getElement(pbFill(m_elemId)).fpos.h            = patienceBarLength;
+        showServed(m_elemId, m_served.ramen, m_served.drink);
     } break;
     case CustomerState::eating: {
-        getElement(m_elemId).clickable                  = false;
-        getElement(pbOut(m_elemId)).visible             = false;
-        getElement(pbFill(m_elemId)).visible            = false;
-        getElement(servedItemId(m_elemId)).visible      = true;
-        getElement(orderTextId(m_elemId)).strikeThrough = true;
-        getElement(m_elemId).src                        = SrcRatio{Sprite2x2::upperRight};
+        getElement(m_elemId).clickable       = false;
+        getElement(pbOut(m_elemId)).visible  = false;
+        getElement(pbFill(m_elemId)).visible = false;
+        showServed(m_elemId, m_served.ramen, m_served.drink);
+        getElement(m_elemId).src                       = SrcRatio{Sprite2x2::upperRight};
+        getElement(orderId(m_elemId)).visible          = false;
+        getElement(orderRamenId(m_elemId)).visible     = false;
+        getElement(orderSoftdrinkId(m_elemId)).visible = false;
     } break;
     case CustomerState::leavingServed: {
-        getElement(m_elemId).src                        = SrcRatio{Sprite2x2::lowerRight};
-        getElement(servedItemId(m_elemId)).visible      = false;
-        getElement(orderId(m_elemId)).visible           = false;
-        getElement(orderTextId(m_elemId)).visible       = false;
-        getElement(orderTextId(m_elemId)).strikeThrough = false;
+        hideServed(m_elemId);
+        getElement(m_elemId).src = SrcRatio{Sprite2x2::lowerRight};
     }
     default:
-        getElement(m_elemId).visible                    = false;
-        getElement(m_elemId).clickable                  = false;
-        getElement(orderId(m_elemId)).visible           = false;
-        getElement(servedItemId(m_elemId)).visible      = false;
-        getElement(pbOut(m_elemId)).visible             = false;
-        getElement(pbFill(m_elemId)).visible            = false;
-        getElement(orderTextId(m_elemId)).visible       = false;
-        getElement(orderTextId(m_elemId)).strikeThrough = false;
+        getElement(m_elemId).visible   = false;
+        getElement(m_elemId).clickable = false;
+        hideServed(m_elemId);
+        getElement(pbOut(m_elemId)).visible            = false;
+        getElement(pbFill(m_elemId)).visible           = false;
+        getElement(orderId(m_elemId)).visible          = false;
+        getElement(orderRamenId(m_elemId)).visible     = false;
+        getElement(orderSoftdrinkId(m_elemId)).visible = false;
         break;
     }
     m_state = changedTo;
@@ -171,6 +182,7 @@ void CustomerVisualizer::handleTick(std::chrono::milliseconds tick) noexcept {
         getElement(pbOut(m_elemId)).src     = getBarOutline(patience_ratio);
         getElement(pbFill(m_elemId)).src    = getBarFilling(patience_ratio);
         getElement(pbFill(m_elemId)).fpos.h = patienceBarLength * patience_ratio;
+        showServed(m_elemId, m_served.ramen, m_served.drink);
     } else if (m_state == CustomerState::eating) {
         if ((tick - m_tick) > 300ms) {
             if (m_toggle) {
@@ -184,4 +196,10 @@ void CustomerVisualizer::handleTick(std::chrono::milliseconds tick) noexcept {
     } else {
         m_tick = tick;
     }
+}
+
+CustomerOrder spawnOrder() noexcept {
+    std::discrete_distribution<> drinksDistr{1, 1, 1, 1};
+    auto drink = static_cast<ShowId>(drinksDistr(rng) + static_cast<int>(ShowId::softdrink_kola));
+    return CustomerOrder{ShowId::bowl_with_ramen_plain, drink};
 }

@@ -58,6 +58,14 @@ static Element gamePlayElems[] = {
     {cust2FRect, ElementId::customer2, ShowId::customer1},
     {cust3FRect, ElementId::customer3, ShowId::customer1},
     {cust4FRect, ElementId::customerRightMost, ShowId::customer1},
+    {softdrink1FDst, ElementId::softdrink1, ShowId::softdrink_kola, false, false, false,
+     SrcRatio{0.25f, 0.f, 0.5f, 1.f}},
+    {softdrink2FDst, ElementId::softdrink2, ShowId::softdrink_funta, false, false, false,
+     SrcRatio{0.25f, 0.f, 0.5f, 1.f}},
+    {softdrink3FDst, ElementId::softdrink3, ShowId::softdrink_peppy, false, false, false,
+     SrcRatio{0.25f, 0.f, 0.5f, 1.f}},
+    {softdrink4FDst, ElementId::softdrink4, ShowId::softdrink_spryte, false, false, false,
+     SrcRatio{0.25f, 0.f, 0.5f, 1.f}},
     {cust1PatienceBarFRect, ElementId::patienceBarOutline1, ShowId::patiencebar},
     {cust2PatienceBarFRect, ElementId::patienceBarOutline2, ShowId::patiencebar},
     {cust3PatienceBarFRect, ElementId::patienceBarOutline3, ShowId::patiencebar},
@@ -68,10 +76,14 @@ static Element gamePlayElems[] = {
     {cust4PatienceBarFRect, ElementId::patienceBarFilling4, ShowId::patiencebar},
     {opArea, ElementId::undefined, ShowId::operating_area, false, true},
     {counterRect, ElementId::undefined, ShowId::counter_surface, false, true},
-    {servingSlotFDst1, ElementId::servedItemCus1, ShowId::bowl_with_ramen_plain},
-    {servingSlotFDst2, ElementId::servingSlot2, ShowId::bowl_with_ramen_plain},
-    {servingSlotFDst3, ElementId::servingSlot3, ShowId::bowl_with_ramen_plain},
-    {servingSlotFDst4, ElementId::servingSlot4, ShowId::bowl_with_ramen_plain},
+    {servedRamenFDst1, ElementId::servedRamenCus1, ShowId::bowl_with_ramen_plain},
+    {servedRamenFDst2, ElementId::servedRamenCus2, ShowId::bowl_with_ramen_plain},
+    {servedRamenFDst3, ElementId::servedRamenCus3, ShowId::bowl_with_ramen_plain},
+    {servedRamenFDst4, ElementId::servedRamenCus4, ShowId::bowl_with_ramen_plain},
+    {servedDrinkFDst1, ElementId::servedDrinkCus1, ShowId::softdrink_kola},
+    {servedDrinkFDst2, ElementId::servedDrinkCus2, ShowId::softdrink_kola},
+    {servedDrinkFDst3, ElementId::servedDrinkCus3, ShowId::softdrink_kola},
+    {servedDrinkFDst4, ElementId::servedDrinkCus4, ShowId::softdrink_kola},
     {cust1OrderFRect, ElementId::order1, ShowId::orderPostIt},
     {cust2OrderFRect, ElementId::order2, ShowId::orderPostIt},
     {cust3OrderFRect, ElementId::order3, ShowId::orderPostIt},
@@ -97,18 +109,30 @@ static Element gamePlayElems[] = {
     {puffFDst2, ElementId::cookingPuff2, ShowId::puff},
     {puffFDst3, ElementId::cookingPuff3, ShowId::puff},
     {puffFDst4, ElementId::cookingPuff4, ShowId::puff},
-    {{cust1OrderFRect.x + orderTextIndentX, cust1OrderFRect.y + orderTextIndentY, 0.f, 0.f},
-     ElementId::ordered_itemTxt1_cus1,
-     ShowId::plain_ramen_text},
-    {{cust2OrderFRect.x + orderTextIndentX, cust2OrderFRect.y + orderTextIndentY, 0.f, 0.f},
-     ElementId::ordered_itemTxt1_cus2,
-     ShowId::plain_ramen_text},
-    {{cust3OrderFRect.x + orderTextIndentX, cust3OrderFRect.y + orderTextIndentY, 0.f, 0.f},
-     ElementId::ordered_itemTxt1_cus3,
-     ShowId::plain_ramen_text},
-    {{cust4OrderFRect.x + orderTextIndentX, cust4OrderFRect.y + orderTextIndentY, 0.f, 0.f},
-     ElementId::ordered_itemTxt1_cus4,
-     ShowId::plain_ramen_text},
+    {{cust1OrderFRect.x + orderRamenIndentX, cust1OrderFRect.y + orderRamenIndentY, orderRamenSize, orderRamenSize},
+     ElementId::ordered_ramen_cus1,
+     ShowId::classicRamen},
+    {{cust2OrderFRect.x + orderRamenIndentX, cust2OrderFRect.y + orderRamenIndentY, orderRamenSize, orderRamenSize},
+     ElementId::ordered_ramen_cus2,
+     ShowId::classicRamen},
+    {{cust3OrderFRect.x + orderRamenIndentX, cust3OrderFRect.y + orderRamenIndentY, orderRamenSize, orderRamenSize},
+     ElementId::ordered_ramen_cus3,
+     ShowId::classicRamen},
+    {{cust4OrderFRect.x + orderRamenIndentX, cust4OrderFRect.y + orderRamenIndentY, orderRamenSize, orderRamenSize},
+     ElementId::ordered_ramen_cus4,
+     ShowId::classicRamen},
+    {{cust1OrderFRect.x + orderLine2IndentX, cust1OrderFRect.y + 2.f * orderRamenIndentY, orderItemSize, orderItemSize},
+     ElementId::ordered_drink_cus1,
+     ShowId::softdrink_kola},
+    {{cust2OrderFRect.x + orderLine2IndentX, cust2OrderFRect.y + 2.f * orderRamenIndentY, orderItemSize, orderItemSize},
+     ElementId::ordered_drink_cus2,
+     ShowId::softdrink_kola},
+    {{cust3OrderFRect.x + orderLine2IndentX, cust3OrderFRect.y + 2.f * orderRamenIndentY, orderItemSize, orderItemSize},
+     ElementId::ordered_drink_cus3,
+     ShowId::softdrink_kola},
+    {{cust4OrderFRect.x + orderLine2IndentX, cust4OrderFRect.y + 2.f * orderRamenIndentY, orderItemSize, orderItemSize},
+     ElementId::ordered_drink_cus4,
+     ShowId::softdrink_kola},
     {moneyFRect, ElementId::moneyCoin, ShowId::coins, false, true, false, SrcRatio{Sprite2x2::upperLeft}},
     {{money_x, money_y, 0.f, 0.f}, ElementId::moneyNumber, ShowId::moneyNumberText, false, true},
     {{400.f, 10.f, 200.f, 40.f},
@@ -151,8 +175,14 @@ Element& getElement(ElementId id) noexcept {
     return *elem;
 }
 
+static uint8_t maxRating   = 20u;
 static float averageRating = 0.f;
 
+void levelUpMaxRating() noexcept {
+    if (maxRating < 100u) {
+        maxRating += 20u;
+    }
+}
 // exponentially weighted moving average (EWMA) restaurantStars_today = (1-α)·prev + α·todayAverage, α controls
 // responsiveness
 void updateRating(int rating) noexcept {
@@ -219,4 +249,37 @@ void cycleEnds() noexcept {
     activateOverlay();
     pause();
     activateNewsOpeningEvent();
+}
+
+void offerSoftdrinks() noexcept {
+    std::for_each(std::begin(gamePlayElems), std::end(gamePlayElems), [](Element& el) {
+        if (isSoftdrinkOption(el.elemId)) {
+            el.visible   = true;
+            el.clickable = true;
+        }
+    });
+}
+
+void dismissSoftdrinks() noexcept {
+    std::for_each(std::begin(gamePlayElems), std::end(gamePlayElems), [](Element& el) {
+        if (isSoftdrinkOption(el.elemId)) {
+            el.visible   = false;
+            el.clickable = false;
+        }
+    });
+}
+
+void showServed(ElementId cus, ShowId ramen, ShowId drink) noexcept {
+    if (ramen != ShowId::lastImg) {
+        getElement(servedRamenId(cus)).visible = true;
+        getElement(servedRamenId(cus)).showId  = ramen;
+    }
+    if (drink != ShowId::lastImg) {
+        getElement(servedDrinkId(cus)).visible = true;
+        getElement(servedDrinkId(cus)).showId  = drink;
+    }
+}
+void hideServed(ElementId cus) noexcept {
+    getElement(servedDrinkId(cus)).visible = false;
+    getElement(servedRamenId(cus)).visible = false;
 }

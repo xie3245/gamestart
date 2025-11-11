@@ -5,12 +5,6 @@
 
 using namespace std::chrono_literals;
 
-struct ClickEvents final {
-    ElementId toClick;
-    ElementId attachRequireOnMouse = ElementId::undefined;
-    ElementId attachForbidOnMouse  = ElementId::undefined;
-};
-
 struct SpriteWhenClicked final {
     ElementId elem;
     std::chrono::milliseconds resetTime = 0ms;
@@ -28,14 +22,16 @@ struct SoundWhenClicked final {
 
 static SpriteWhenClicked clickImgs[]{{ElementId::binSideBar}, {ElementId::sinkSideBar}, {ElementId::fridge}};
 
-static constexpr AttachWhenClicked attachElems[]{{ElementId::bowlsSideBar, ShowId::empty_bowl},
-                                                 {ElementId::chopsticksSideBar, ShowId::chopsticks1},
-                                                 {ElementId::potSideBar, ShowId::empty_pot},
-                                                 {ElementId::classicRamenSideBar, ShowId::classicRamen},
-                                                 {ElementId::sinkSideBar, ShowId::pot_water_added}};
+static constexpr AttachWhenClicked attachElems[]{
+    {ElementId::bowlsSideBar, ShowId::empty_bowl},     {ElementId::chopsticksSideBar, ShowId::chopsticks1},
+    {ElementId::potSideBar, ShowId::empty_pot},        {ElementId::classicRamenSideBar, ShowId::classicRamen},
+    {ElementId::sinkSideBar, ShowId::pot_water_added}, {ElementId::softdrink1, ShowId::softdrink_kola},
+    {ElementId::softdrink2, ShowId::softdrink_funta},  {ElementId::softdrink3, ShowId::softdrink_peppy},
+    {ElementId::softdrink4, ShowId::softdrink_spryte}};
 
 static constexpr SoundWhenClicked soundElems[]{{ElementId::binSideBar, SoundId::bin_open},
-                                               {ElementId::sinkSideBar, SoundId::running_water}};
+                                               {ElementId::sinkSideBar, SoundId::running_water},
+                                               {ElementId::fridge, SoundId::fridge}};
 
 void SideBar::handleClick(ElementId elemId) noexcept {
     auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs),
@@ -59,6 +55,14 @@ void SideBar::handleClick(ElementId elemId) noexcept {
 
     if (elemId == ElementId::binSideBar) {
         clearMouseItem();
+    }
+
+    if (elemId == ElementId::fridge) {
+        offerSoftdrinks();
+    }
+
+    if (isSoftdrinkOption(elemId)) {
+        dismissSoftdrinks();
     }
 }
 

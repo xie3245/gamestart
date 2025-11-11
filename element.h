@@ -25,9 +25,8 @@ struct Element {
     float ratio = 1.f;
     double angle;
     ShowId showId;
-    bool visible       = false;
-    bool hoverable     = false;
-    bool clickable     = false;
-    bool strikeThrough = false;
+    bool visible   = false;
+    bool hoverable = false;
+    bool clickable = false;
     ElementId elemId;
 };

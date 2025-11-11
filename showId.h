@@ -31,6 +31,10 @@ enum class ShowId {
     star,
     orderPostIt,
     fridge,
+    softdrink_kola,
+    softdrink_funta,
+    softdrink_peppy,
+    softdrink_spryte,
     okayBtn,
     newsOpen,
     billPaper,
@@ -51,7 +55,6 @@ enum class ShowId {
     customerMax,
     lastImg,
     moneyNumberText,
-    plain_ramen_text,
     last
 };
 
@@ -61,3 +64,7 @@ constexpr ShowId toImgId(int idx) noexcept {
 }
 
 constexpr bool isCustomer(ShowId id) noexcept { return (id >= ShowId::customer0) && (id <= ShowId::customerMax); }
+constexpr bool isSoftdrink(ShowId id) noexcept {
+    return (id >= ShowId::softdrink_kola) && (id <= ShowId::softdrink_spryte);
+}
+constexpr bool isRamenBowl(ShowId id) noexcept { return (id == ShowId::bowl_with_ramen_plain); }
