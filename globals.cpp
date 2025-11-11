@@ -34,7 +34,7 @@ std::string getText(ShowId id) noexcept {
     if (id == ShowId::moneyNumberText) {
         return std::to_string(money);
     }
-    return "ramen";
+    return "classic";
 }
 
 static bool paused = false;
@@ -53,6 +53,7 @@ static Element nullElemnt{{0.f, 0.f, 0.f, 0.f}, ElementId::undefined, ShowId::la
 
 static Element gamePlayElems[] = {
     {bgDst, ElementId::undefined, ShowId::bg, false, true},
+    {fridgeDst, ElementId::fridge, ShowId::fridge, false, true, true, SrcRatio{Sprite1x2::upper}},
     {cust1FRect, ElementId::customer1, ShowId::customer1},
     {cust2FRect, ElementId::customer2, ShowId::customer1},
     {cust3FRect, ElementId::customer3, ShowId::customer1},
@@ -76,15 +77,18 @@ static Element gamePlayElems[] = {
     {cust3OrderFRect, ElementId::order3, ShowId::orderPostIt},
     {cust4OrderFRect, ElementId::order4, ShowId::orderPostIt},
     {potToolFRect, ElementId::potSideBar, ShowId::empty_pot, true, true, true},
-    {pkgFRect, ElementId::ramenSideBar, ShowId::ramenPkg, true, true, true},
-    {sinkFRect, ElementId::sinkSideBar, ShowId::sink, true, true, true},
-    {binFRect, ElementId::binSideBar, ShowId::bin, true, true, true},
+    {classicRamenFRect, ElementId::classicRamenSideBar, ShowId::classicRamen, true, true, true},
+    {beefRamenFRect, ElementId::beefRamenSideBar, ShowId::beefRamen},
+    {spicyRamenFRect, ElementId::spicyRamenSideBar, ShowId::spicyRamen},
+    {seafoodRamenFRect, ElementId::seafoodRamenSideBar, ShowId::seafoodRamen},
+    {sinkFRect, ElementId::sinkSideBar, ShowId::sink, true, true, true, SrcRatio{Sprite1x2::upper}},
+    {binFRect, ElementId::binSideBar, ShowId::bin, true, true, true, SrcRatio{Sprite1x2::upper}},
     {bowlsFRect, ElementId::bowlsSideBar, ShowId::bowls, true, true, true},
     {chopsticksToolFRect, ElementId::chopsticksSideBar, ShowId::chopsticks2, true, true, true},
-    {cookerFDst1, ElementId::undefined, ShowId::burner, false, true},
-    {cookerFDst2, ElementId::undefined, ShowId::burner, false, true},
-    {cookerFDst3, ElementId::undefined, ShowId::burner, false, true},
-    {cookerFDst4, ElementId::undefined, ShowId::burner, false, true},
+    {burnerFDst, ElementId::undefined, ShowId::burner, false, true}, /*
+     {cookerFDst2, ElementId::undefined, ShowId::burner, false, true},
+     {cookerFDst3, ElementId::undefined, ShowId::burner, false, true},
+     {cookerFDst4, ElementId::undefined, ShowId::burner, false, true}, */
     {potFDst1, ElementId::cookingSlot1, ShowId::empty_pot, false, false, true},
     {potFDst2, ElementId::cookingSlot2, ShowId::empty_pot, false, false, true},
     {potFDst3, ElementId::cookingSlot3, ShowId::empty_pot, false, false, true},
@@ -107,8 +111,14 @@ static Element gamePlayElems[] = {
      ShowId::plain_ramen_text},
     {moneyFRect, ElementId::moneyCoin, ShowId::coins, false, true, false, SrcRatio{Sprite2x2::upperLeft}},
     {{money_x, money_y, 0.f, 0.f}, ElementId::moneyNumber, ShowId::moneyNumberText, false, true},
-    {{400.f, 10.f, 40.f, 40.f}, ElementId::ratingOutline, ShowId::star, false, true, false, SrcRatio{Sprite2x1::right}},
-    {{400.f, 10.f, 40.f, 40.f},
+    {{400.f, 10.f, 200.f, 40.f},
+     ElementId::ratingOutline,
+     ShowId::star,
+     false,
+     true,
+     false,
+     SrcRatio{Sprite2x1::right}},
+    {{400.f, 10.f, 200.f, 40.f},
      ElementId::ratingFilling,
      ShowId::star,
      false,
@@ -149,7 +159,7 @@ void updateRating(int rating) noexcept {
     averageRating = 0.8f * averageRating + 0.2 * rating;
     Element& elem = getElement(ElementId::ratingFilling);
     elem.src      = SrcRatio{Sprite2x1::left, averageRating * 0.5f};
-    elem.fpos.w   = 40.f * averageRating * 0.5f;
+    elem.fpos.w   = 200.f * averageRating * 0.5f;
 }
 
 void activateNewsOpeningEvent() noexcept {

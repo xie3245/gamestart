@@ -23,7 +23,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::WATER_BOILING: {
-        if ((elemId == m_elemId) && mouseItem() == ShowId::ramenPkg) {
+        if ((elemId == m_elemId) && mouseItem() == ShowId::classicRamen) {
             m_state = RamenState::NOODLES_ADDED;
             m_vis.stateChanged(RamenState::NOODLES_ADDED);
             clearMouseItem();

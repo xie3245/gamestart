@@ -11,10 +11,8 @@ struct ClickEvents final {
     ElementId attachForbidOnMouse  = ElementId::undefined;
 };
 
-struct ImageWhenClicked final {
+struct SpriteWhenClicked final {
     ElementId elem;
-    ShowId imgOrig;
-    ShowId imgClicked;
     std::chrono::milliseconds resetTime = 0ms;
 };
 
@@ -28,13 +26,12 @@ struct SoundWhenClicked final {
     SoundId sound;
 };
 
-static ImageWhenClicked clickImgs[]{{ElementId::binSideBar, ShowId::bin, ShowId::bin_open},
-                                    {ElementId::sinkSideBar, ShowId::sink, ShowId::sink_running_water}};
+static SpriteWhenClicked clickImgs[]{{ElementId::binSideBar}, {ElementId::sinkSideBar}, {ElementId::fridge}};
 
 static constexpr AttachWhenClicked attachElems[]{{ElementId::bowlsSideBar, ShowId::empty_bowl},
                                                  {ElementId::chopsticksSideBar, ShowId::chopsticks1},
                                                  {ElementId::potSideBar, ShowId::empty_pot},
-                                                 {ElementId::ramenSideBar, ShowId::ramenPkg},
+                                                 {ElementId::classicRamenSideBar, ShowId::classicRamen},
                                                  {ElementId::sinkSideBar, ShowId::pot_water_added}};
 
 static constexpr SoundWhenClicked soundElems[]{{ElementId::binSideBar, SoundId::bin_open},
@@ -42,10 +39,10 @@ static constexpr SoundWhenClicked soundElems[]{{ElementId::binSideBar, SoundId::
 
 void SideBar::handleClick(ElementId elemId) noexcept {
     auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs),
-                            [elemId](const ImageWhenClicked& e) { return e.elem == elemId; });
+                            [elemId](const SpriteWhenClicked& e) { return e.elem == elemId; });
     if (img != std::end(clickImgs)) {
-        getElement(elemId).showId = img->imgClicked;
-        img->resetTime            = m_tick + 500ms;
+        getElement(elemId).src = SrcRatio{Sprite1x2::lower};
+        img->resetTime         = m_tick + 500ms;
     }
 
     auto attach = std::find_if(std::begin(attachElems), std::end(attachElems),
@@ -67,12 +64,12 @@ void SideBar::handleClick(ElementId elemId) noexcept {
 
 void SideBar::handleTick(std::chrono::milliseconds tick) noexcept {
     m_tick   = tick;
-    auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs), [tick](const ImageWhenClicked& e) {
+    auto img = std::find_if(std::begin(clickImgs), std::end(clickImgs), [tick](const SpriteWhenClicked& e) {
         return (e.resetTime != 0ms) && (tick >= e.resetTime);
     });
 
     if (img != std::end(clickImgs)) {
-        getElement(img->elem).showId = img->imgOrig;
-        img->resetTime               = 0ms;
+        getElement(img->elem).src = SrcRatio{Sprite1x2::upper};
+        img->resetTime            = 0ms;
     }
 }

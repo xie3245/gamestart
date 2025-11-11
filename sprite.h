@@ -1,6 +1,7 @@
 #pragma once
 
 enum class Sprite2x1 { left, right };
+enum class Sprite1x2 { upper, lower };
 
 enum class Sprite2x2 {
     upperLeft,
@@ -19,7 +20,7 @@ struct SrcRatio final {
     float r_h           = 1.f;
     SrcRatio() noexcept = default;
     explicit constexpr SrcRatio(Sprite2x1 part) noexcept : r_x((part == Sprite2x1::right) ? 0.5f : 0.f), r_w(0.5f) {}
-
+    explicit constexpr SrcRatio(Sprite1x2 part) noexcept : r_y((part == Sprite1x2::lower) ? 0.5f : 0.f), r_h(0.5f) {}
     explicit constexpr SrcRatio(Sprite2x1 part, float w_ratio) noexcept
         : r_x((part == Sprite2x1::right) ? 0.5f : 0.f)
         , r_w(0.5f * w_ratio) {}
