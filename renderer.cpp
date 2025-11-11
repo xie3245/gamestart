@@ -82,7 +82,7 @@ void Renderer::renderLine(float x1, float y1, float x2, float y2) const noexcept
 void Renderer::captureFrame() const noexcept {
     SDL_Surface* surface = SDL_RenderReadPixels(m_renderer, nullptr);
     char filename[64];
-    std::sprintf(filename, "captures/frame%04d.bmp", frameCnt);
+    std::sprintf(filename, "captures/frame%I64d.bmp", frameCnt);
     SDL_SaveBMP(surface, filename);
 
     SDL_DestroySurface(surface);

@@ -4,7 +4,7 @@
 #include "elementId.h"
 #include "showId.h"
 
-class Element;
+struct Element;
 
 bool attachToMouse(ElementId whosAsking, ShowId id) noexcept;
 void clearMouseItem() noexcept;

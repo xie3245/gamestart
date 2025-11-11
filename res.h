@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include <SDL3_image/SDL_image.h>
 #include "showId.h"
 
