@@ -9,8 +9,8 @@ enum class SoundId {
     burp,
     coins_collection,
     fridge,
-    /*     achievement,
-        ding,
+    unlock,
+    /*    ding,
         news, */
     undefined
 };

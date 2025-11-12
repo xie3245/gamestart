@@ -41,26 +41,26 @@ constexpr SDL_Color black{0, 0, 0, 255};
 constexpr SDL_Color gold{245, 131, 39, 255};
 }  // namespace color
 
-constexpr SDL_FRect bgDst                 = {0.f, 0.f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
-constexpr SDL_FRect fridgeDst             = {SCREEN_WIDTH * 0.7f, SCREEN_HEIGHT * 0.1f, 300.f, 400.f};
-constexpr float drinksy                   = fridgeDst.y - 20.f;
-constexpr float drinksw                   = fridgeDst.w * 0.2f;
-constexpr float drinksh                   = fridgeDst.w * 0.4f;
-constexpr SDL_FRect softdrink1FDst        = {fridgeDst.x - drinksw * 4.1f, drinksy, drinksw, drinksh};
-constexpr SDL_FRect softdrink2FDst        = {softdrink1FDst.x + softdrink1FDst.w, drinksy, drinksw, drinksh};
-constexpr SDL_FRect softdrink3FDst        = {softdrink2FDst.x + softdrink2FDst.w, drinksy, drinksw, drinksh};
-constexpr SDL_FRect softdrink4FDst        = {softdrink3FDst.x + softdrink3FDst.w, drinksy, drinksw, drinksh};
-constexpr SDL_FRect opArea                = {0.f, 450.f, SCREEN_WIDTH, 630.f};
-constexpr SDL_FRect counterRect           = {0.f, counterHeight, SCREEN_WIDTH, 72.f};
-constexpr SDL_FRect moneyFRect            = {10.f, 10.f, 40.f, 40.f};
-constexpr SDL_FRect cust1FRect            = {cusBegin, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust2FRect            = {cust1FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust3FRect            = {cust2FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust4FRect            = {cust3FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
-constexpr SDL_FRect cust1OrderFRect       = {cust1FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
-constexpr SDL_FRect cust2OrderFRect       = {cust2FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
-constexpr SDL_FRect cust3OrderFRect       = {cust3FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
-constexpr SDL_FRect cust4OrderFRect       = {cust4FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
+constexpr SDL_FRect bgDst           = {0.f, 0.f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
+constexpr SDL_FRect fridgeDst       = {SCREEN_WIDTH * 0.7f, SCREEN_HEIGHT * 0.1f, 300.f, 400.f};
+constexpr float drinksy             = fridgeDst.y - 20.f;
+constexpr float drinksw             = fridgeDst.w * 0.2f;
+constexpr float drinksh             = fridgeDst.w * 0.4f;
+constexpr SDL_FRect softdrink1FDst  = {fridgeDst.x - drinksw * 4.1f, drinksy, drinksw, drinksh};
+constexpr SDL_FRect softdrink2FDst  = {softdrink1FDst.x + softdrink1FDst.w, drinksy, drinksw, drinksh};
+constexpr SDL_FRect softdrink3FDst  = {softdrink2FDst.x + softdrink2FDst.w, drinksy, drinksw, drinksh};
+constexpr SDL_FRect softdrink4FDst  = {softdrink3FDst.x + softdrink3FDst.w, drinksy, drinksw, drinksh};
+constexpr SDL_FRect opArea          = {0.f, counterHeight + 20.f, SCREEN_WIDTH, SCREEN_WIDTH - counterHeight - 20.f};
+constexpr SDL_FRect counterRect     = {0.f, counterHeight, SCREEN_WIDTH, 72.f};
+constexpr SDL_FRect moneyFRect      = {10.f, 10.f, 40.f, 40.f};
+constexpr SDL_FRect cust1FRect      = {cusBegin, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust2FRect      = {cust1FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust3FRect      = {cust2FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust4FRect      = {cust3FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
+constexpr SDL_FRect cust1OrderFRect = {cust1FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
+constexpr SDL_FRect cust2OrderFRect = {cust2FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
+constexpr SDL_FRect cust3OrderFRect = {cust3FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
+constexpr SDL_FRect cust4OrderFRect = {cust4FRect.x - 0.2f * cusSize, counterHeight, postItSize, postItSize};
 constexpr SDL_FRect cust1PatienceBarFRect = {cust1FRect.x + 10.f, cust1FRect.y, 10.f, patienceBarLength};
 constexpr SDL_FRect cust2PatienceBarFRect = {cust2FRect.x + 10.f, cust2FRect.y, 10.f, patienceBarLength};
 constexpr SDL_FRect cust3PatienceBarFRect = {cust3FRect.x + 10.f, cust3FRect.y, 10.f, patienceBarLength};
@@ -73,14 +73,13 @@ constexpr SDL_FRect cookerFDst2 = {cookerFDst1.x + cookerSize, cookerY, cookerSi
 constexpr SDL_FRect cookerFDst3 = {cookerFDst2.x + cookerSize, cookerY, cookerSize, cookerSize};
 constexpr SDL_FRect cookerFDst4 = {cookerFDst3.x + cookerSize, cookerY, cookerSize, cookerSize};
 
-constexpr float columnSecondItemY = columnFirstY - appliancesSize - itemDis;
-constexpr float columnThirdItemY  = columnFirstY - 2.f * (appliancesSize + itemDis);
-constexpr float columnFourthItemY = columnFirstY - 3.f * (appliancesSize + itemDis);
-constexpr float columnFifthItemY  = columnFirstY - 4.f * (appliancesSize + itemDis);
-
-constexpr SDL_FRect sinkFRect = {HALF_WIDTH, counterHeight + counterRect.h, appliancesSize, appliancesSize};
-constexpr SDL_FRect binFRect  = {HALF_WIDTH + itemDis + appliancesSize, counterHeight + counterRect.h, appliancesSize,
-                                 appliancesSize};
+constexpr float ratingBarLength = 200.f;
+constexpr float ratingBarWidth  = 40.f;
+constexpr float ratingBarX      = 400.f;
+constexpr float ratingBarY      = 10.f;
+constexpr SDL_FRect sinkFRect   = {HALF_WIDTH, counterHeight + counterRect.h, appliancesSize, appliancesSize};
+constexpr SDL_FRect binFRect    = {HALF_WIDTH + itemDis + appliancesSize, counterHeight + counterRect.h, appliancesSize,
+                                   appliancesSize};
 
 constexpr float cookingToolX            = HALF_WIDTH * 0.5f;
 constexpr float cookingToolY            = cookerY + cookerSize + itemDis;

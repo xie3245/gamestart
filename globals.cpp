@@ -1,6 +1,8 @@
 #include "globals.h"
 #include "ui.h"
 #include "element.h"
+#include <cmath>
+#include "sound.h"
 
 ShowId itemOnMouse = ShowId::last;
 
@@ -25,39 +27,25 @@ bool attachToMouse(ElementId whosAsking, ShowId id) noexcept {
 void clearMouseItem() noexcept { itemOnMouse = ShowId::last; }
 ShowId mouseItem() noexcept { return itemOnMouse; }
 
-static int64_t money = 0;
-
-void gainMoney(uint16_t diff) noexcept { money += diff; }
-void loseMoney(uint16_t diff) noexcept { money -= diff; }
-
-std::string getText(ShowId id) noexcept {
-    if (id == ShowId::moneyNumberText) {
-        return std::to_string(money);
-    }
-    return "classic";
-}
-
-static bool paused = false;
-bool isPaused() noexcept { return paused; }
-void pause() noexcept { paused = true; }
-void unpause() noexcept { paused = false; }
-void togglePause() noexcept { paused = !paused; }
-
-static bool overlay = false;
-bool isOverlay() noexcept { return overlay; }
-void activateOverlay() noexcept { overlay = true; }
-void deactivateOverlay() noexcept { overlay = false; }
-void toggleOverlay() noexcept { overlay = !overlay; }
+static int64_t money               = 0;
+static bool paused                 = false;
+static constexpr uint8_t maxRating = 100u;
+static uint8_t currMaxRating       = 20u;
+static float averageRating         = 0.f;
 
 static Element nullElemnt{{0.f, 0.f, 0.f, 0.f}, ElementId::undefined, ShowId::last};
 
 static Element gamePlayElems[] = {
     {bgDst, ElementId::undefined, ShowId::bg, false, true},
-    {fridgeDst, ElementId::fridge, ShowId::fridge, false, true, true, SrcRatio{Sprite1x2::upper}},
+    {fridgeDst, ElementId::fridge, ShowId::fridge, false, false, false, SrcRatio{Sprite1x2::upper}},
     {cust1FRect, ElementId::customer1, ShowId::customer1},
     {cust2FRect, ElementId::customer2, ShowId::customer1},
     {cust3FRect, ElementId::customer3, ShowId::customer1},
     {cust4FRect, ElementId::customerRightMost, ShowId::customer1},
+    {cust1FRect, ElementId::nextCus1Time, ShowId::cus1NextText},
+    {cust2FRect, ElementId::nextCus2Time, ShowId::cus2NextText},
+    {cust3FRect, ElementId::nextCus3Time, ShowId::cus3NextText},
+    {cust4FRect, ElementId::nextCus4Time, ShowId::cus4NextText},
     {softdrink1FDst, ElementId::softdrink1, ShowId::softdrink_kola, false, false, false,
      SrcRatio{0.25f, 0.f, 0.5f, 1.f}},
     {softdrink2FDst, ElementId::softdrink2, ShowId::softdrink_funta, false, false, false,
@@ -135,14 +123,15 @@ static Element gamePlayElems[] = {
      ShowId::softdrink_kola},
     {moneyFRect, ElementId::moneyCoin, ShowId::coins, false, true, false, SrcRatio{Sprite2x2::upperLeft}},
     {{money_x, money_y, 0.f, 0.f}, ElementId::moneyNumber, ShowId::moneyNumberText, false, true},
-    {{400.f, 10.f, 200.f, 40.f},
+    {{ratingBarX + ratingBarLength, ratingBarY, 0.f, 0.f}, ElementId::ratingNumber, ShowId::ratingNumberText},
+    {{ratingBarX, ratingBarY, ratingBarLength, ratingBarWidth},
      ElementId::ratingOutline,
      ShowId::star,
      false,
      true,
      false,
      SrcRatio{Sprite2x1::right}},
-    {{400.f, 10.f, 200.f, 40.f},
+    {{ratingBarX, ratingBarY, ratingBarLength, ratingBarWidth},
      ElementId::ratingFilling,
      ShowId::star,
      false,
@@ -159,12 +148,30 @@ static Element overlayElems[] = {
      ElementId::undefined,
      ShowId::billPaper}};
 
-std::span<Element> getActiveElements() noexcept {
-    if (overlay) {
-        return overlayElems;
+std::chrono::milliseconds nextShowUp[4u];
+bool isPaused() noexcept { return paused; }
+void pause() noexcept { paused = true; }
+void unpause() noexcept { paused = false; }
+void togglePause() noexcept { paused = !paused; }
+void gainMoney(uint16_t diff) noexcept { money += diff; }
+void loseMoney(uint16_t diff) noexcept { money -= diff; }
+
+std::string getText(ShowId id) noexcept {
+    if (id == ShowId::moneyNumberText) {
+        return std::to_string(money);
     }
-    return gamePlayElems;
+    if (id == ShowId::ratingNumberText) {
+        return std::to_string(averageRating);
+    }
+
+    if ((id >= ShowId::cus1NextText) && (id <= ShowId::cus4NextText)) {
+        auto idx = static_cast<size_t>(id) - static_cast<size_t>(ShowId::cus1NextText);
+        return std::to_string(nextShowUp[idx].count());
+    }
+    return "classic";
 }
+
+std::span<Element> getActiveElements() noexcept { return gamePlayElems; }
 
 Element& getElement(ElementId id) noexcept {
     auto elem = std::find_if(std::begin(gamePlayElems), std::end(gamePlayElems),
@@ -174,82 +181,28 @@ Element& getElement(ElementId id) noexcept {
     }
     return *elem;
 }
-
-static uint8_t maxRating   = 20u;
-static float averageRating = 0.f;
-
 void levelUpMaxRating() noexcept {
-    if (maxRating < 100u) {
-        maxRating += 20u;
+    if (currMaxRating < maxRating) {
+        currMaxRating += 20u;
     }
 }
+
+float waitPenalty     = 1.f;
+float matchImportance = 1.f;
+float waitImportance  = 1.f;
 // exponentially weighted moving average (EWMA) restaurantStars_today = (1-α)·prev + α·todayAverage, α controls
 // responsiveness
-void updateRating(int rating) noexcept {
+void updateRating(float waitedRatio, float orderMatchR) noexcept {
+    float rating = std::pow(orderMatchR, matchImportance) *
+                   std::pow((1.f - std::pow(waitedRatio, waitPenalty)), waitImportance) * currMaxRating;
     averageRating = 0.8f * averageRating + 0.2 * rating;
     Element& elem = getElement(ElementId::ratingFilling);
-    elem.src      = SrcRatio{Sprite2x1::left, averageRating * 0.5f};
-    elem.fpos.w   = 200.f * averageRating * 0.5f;
+    elem.src      = SrcRatio{Sprite2x1::left, averageRating / maxRating};
+    elem.fpos.w   = ratingBarLength * averageRating / maxRating;
 }
 
-void activateNewsOpeningEvent() noexcept {
-    static bool called = false;
-    if (!called) {
-        called                   = true;
-        overlayElems[1u].visible = true;
-    } else {
-        overlayElems[2u].visible = true;
-    }
-}
-
-void newsOpeningEvent(std::chrono::milliseconds tick) noexcept {
-    using namespace std::chrono_literals;
-    static auto start = tick;
-    if (overlayElems[1u].visible) {
-        if ((tick - start) <= 1s) {
-            overlayElems[1u].ratio = std::chrono::duration<float, std::milli>(tick - start) / 1s;
-            overlayElems[1u].angle = 360.f * std::chrono::duration<float, std::milli>(tick - start) / 1s;
-        } else if ((tick - start) > 4s) {
-            overlayElems[1u].visible = false;
-            overlayElems[2u].visible = true;
-        }
-        return;
-    }
-    start = tick;
-}
-
-void billPaperEvent(std::chrono::milliseconds tick) noexcept {
-    using namespace std::chrono_literals;
-    static auto start = tick;
-    if (overlayElems[2u].visible) {
-        if ((tick - start) <= 1s) {
-            overlayElems[2u].ratio = std::chrono::duration<float, std::milli>(tick - start) / 1s;
-            overlayElems[2u].angle = 360.f * std::chrono::duration<float, std::milli>(tick - start) / 1s;
-        } else if ((tick - start) > 4s) {
-            overlayElems[0u].visible = true;
-        }
-        return;
-    }
-
-    start = tick;
-}
-
-void tickOverlay(std::chrono::milliseconds tick) noexcept {
-    newsOpeningEvent(tick);
-    billPaperEvent(tick);
-}
-
-void cycleStarts() noexcept {
-    deactivateOverlay();
-    unpause();
-    overlayElems[0u].visible = false;
-    overlayElems[2u].visible = false;
-}
-void cycleEnds() noexcept {
-    activateOverlay();
-    pause();
-    activateNewsOpeningEvent();
-}
+static bool softdrink = false;
+bool softdrinkUnlocked() noexcept { return softdrink; }
 
 void offerSoftdrinks() noexcept {
     std::for_each(std::begin(gamePlayElems), std::end(gamePlayElems), [](Element& el) {
@@ -282,4 +235,20 @@ void showServed(ElementId cus, ShowId ramen, ShowId drink) noexcept {
 void hideServed(ElementId cus) noexcept {
     getElement(servedDrinkId(cus)).visible = false;
     getElement(servedRamenId(cus)).visible = false;
+}
+
+constexpr float drinksUnlockThreshold = 15.f;
+
+void triggerSpecialEvents() noexcept {
+    if (!softdrink && (averageRating > drinksUnlockThreshold)) {
+        playSound(SoundId::unlock);
+        getElement(ElementId::fridge).visible   = true;
+        getElement(ElementId::fridge).clickable = true;
+        softdrink                               = true;
+    }
+}
+
+void updateNextCustomerTime(ElementId cusId, std::chrono::milliseconds duration) noexcept {
+    size_t idx      = static_cast<size_t>(cusId) - static_cast<size_t>(ElementId::customer1);
+    nextShowUp[idx] = duration;
 }

@@ -60,6 +60,11 @@ enum class ElementId {
     ordered_drink_cus4,
     moneyCoin,
     moneyNumber,
+    ratingNumber,
+    nextCus1Time,
+    nextCus2Time,
+    nextCus3Time,
+    nextCus4Time,
     ratingOutline,
     ratingFilling,
     okayButton
@@ -69,7 +74,10 @@ constexpr bool isCustomer(ElementId id) noexcept {
     return (id >= ElementId::customer1) && (id <= ElementId::customerRightMost);
 }
 
-constexpr bool isText(ElementId id) noexcept { return (id == ElementId::moneyNumber); }
+constexpr bool isText(ElementId id) noexcept {
+    return (id == ElementId::moneyNumber) || (id == ElementId::ratingNumber) ||
+           ((id <= ElementId::nextCus4Time) && (id >= ElementId::nextCus1Time));
+}
 
 inline constexpr ElementId puffId(ElementId cookingSlotId) noexcept {
     int diff = static_cast<int>(ElementId::cookingPuff1) - static_cast<int>(ElementId::cookingSlot1);
@@ -109,6 +117,6 @@ inline constexpr ElementId servedDrinkId(ElementId cusId) noexcept {
     return static_cast<ElementId>(static_cast<int>(cusId) + diff);
 }
 
-inline constexpr isSoftdrinkOption(ElementId id) noexcept {
+inline constexpr bool isSoftdrinkOption(ElementId id) noexcept {
     return (id >= ElementId::softdrink1) && (id <= ElementId::softdrink4);
 }

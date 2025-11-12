@@ -6,11 +6,10 @@
 
 using namespace std::chrono_literals;
 
-RamenCooking::RamenCooking(ElementId id, const AudioMixer& mx) noexcept
+RamenCooking::RamenCooking(ElementId id) noexcept
     : m_elemId(id)
     , m_frect(getCookingSlotFRect(id))
     , m_state(RamenState::IDLE)
-    , m_mixer(mx)
     , m_vis(m_elemId) {}
 
 void RamenCooking::handleClick(ElementId elemId) noexcept {
@@ -64,7 +63,7 @@ void RamenCooking::handleTick(std::chrono::milliseconds tick) noexcept {
         if ((tick - m_tick) > 2s) {
             m_state = RamenState::WATER_BOILING;
             m_vis.stateChanged(RamenState::WATER_BOILING);
-            m_mixer.play(SoundId::water_boiling);
+            playSound(SoundId::water_boiling);
             m_tick = tick;
         }
     } break;
@@ -105,7 +104,7 @@ void CookingPotVisualizer::stateChanged(RamenState changedTo) noexcept {
     switch (changedTo) {
     case RamenState::POT_IN_PLACE: {
         elem.visible = true;
-        elem.showId   = ShowId::pot_water_added;
+        elem.showId  = ShowId::pot_water_added;
     } break;
     case RamenState::WATER_BOILING: {
         elem.showId = ShowId::pot_water_boiling;
@@ -114,19 +113,19 @@ void CookingPotVisualizer::stateChanged(RamenState changedTo) noexcept {
         elem.showId = ShowId::pot_noodle_added;
         break;
     case RamenState::TO_STIR:
-        elem.showId                           = ShowId::pot_noodle_cooking;
+        elem.showId                          = ShowId::pot_noodle_cooking;
         getElement(puffId(m_elemId)).visible = true;
 
         break;
     case RamenState::HALF_COOKED:
-        elem.showId                           = ShowId::pot_noodle_halfcooked;
+        elem.showId                          = ShowId::pot_noodle_halfcooked;
         getElement(puffId(m_elemId)).visible = false;
         break;
     case RamenState::COOKED:
         elem.showId = ShowId::pot_noodle_cooked;
         break;
     case RamenState::BURNT:
-        elem.showId                           = ShowId::pot_burnt;
+        elem.showId                          = ShowId::pot_burnt;
         getElement(puffId(m_elemId)).visible = false;
         break;
     default:

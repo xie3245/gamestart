@@ -50,7 +50,7 @@ void SideBar::handleClick(ElementId elemId) noexcept {
     auto sd = std::find_if(std::begin(soundElems), std::end(soundElems),
                            [elemId](const SoundWhenClicked& e) { return e.elem == elemId; });
     if (sd != std::end(soundElems)) {
-        m_mixer.play(sd->sound);
+        playSound(sd->sound);
     }
 
     if (elemId == ElementId::binSideBar) {

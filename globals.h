@@ -12,7 +12,7 @@ ShowId mouseItem() noexcept;
 
 void gainMoney(uint16_t diff) noexcept;
 void loseMoney(uint16_t diff) noexcept;
-void updateRating(int rating) noexcept;
+void updateRating(float waitedR, float orderMatchR) noexcept;
 
 std::chrono::milliseconds getGameClk() noexcept;
 bool isPaused() noexcept;
@@ -20,22 +20,18 @@ void pause() noexcept;
 void unpause() noexcept;
 void togglePause() noexcept;
 
-bool isOverlay() noexcept;
-void activateOverlay() noexcept;
-void deactivateOverlay() noexcept;
-void toggleOverlay() noexcept;
-void tickOverlay(std::chrono::milliseconds tick) noexcept;
-
 std::span<Element> getActiveElements() noexcept;
 Element& getElement(ElementId id) noexcept;
 
 std::string getText(ShowId id) noexcept;
 
+bool softdrinkUnlocked() noexcept;
 void offerSoftdrinks() noexcept;
 void dismissSoftdrinks() noexcept;
 
 void showServed(ElementId cus, ShowId ramen, ShowId drink) noexcept;
 void hideServed(ElementId cus) noexcept;
 
-void cycleStarts() noexcept;
-void cycleEnds() noexcept;
+void triggerSpecialEvents() noexcept;
+
+void updateNextCustomerTime(ElementId cusId, std::chrono::milliseconds duration) noexcept;

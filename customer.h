@@ -28,7 +28,7 @@ private:
 
 class Customer final {
 public:
-    Customer(const AudioMixer& mx, ElementId id) noexcept;
+    explicit Customer(ElementId id) noexcept;
     void handleClick(ElementId clicked) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
 
@@ -36,12 +36,9 @@ private:
     CustomerState m_state = CustomerState::undefined;
     std::chrono::milliseconds m_start;
     std::chrono::milliseconds m_tick;
-    const AudioMixer& m_mixer;
     ElementId m_id;
     CustomerVisualizer m_vis;
     CustomerOrder m_order;
     CustomerOrder m_served;
-
-    bool orderMatch(ShowId id) const noexcept;
     bool orderServed() const noexcept;
 };

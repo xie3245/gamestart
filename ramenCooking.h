@@ -23,7 +23,7 @@ private:
 
 class RamenCooking final {
 public:
-    RamenCooking(ElementId id, const AudioMixer& mx) noexcept;
+    explicit RamenCooking(ElementId id) noexcept;
     void handleClick(ElementId elemId) noexcept;
     void handleTick(std::chrono::milliseconds tick) noexcept;
 
@@ -32,6 +32,5 @@ private:
     SDL_FRect m_frect;
     RamenState m_state;
     std::chrono::milliseconds m_tick;
-    const AudioMixer& m_mixer;
     CookingPotVisualizer m_vis;
 };

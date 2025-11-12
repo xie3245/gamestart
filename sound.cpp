@@ -1,8 +1,26 @@
 #include "sound.h"
 #include <iostream>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <chrono>
+#include <memory>
 
 using Audio = std::unique_ptr<MIX_Audio, void (*)(MIX_Audio*)>;
 
+class AudioMixer final {
+public:
+    AudioMixer() noexcept;
+    ~AudioMixer() noexcept;
+
+    void play(SoundId id, int repetition = 0, float gain_ratio = 1.f) const noexcept;
+
+private:
+    const bool m_init;
+    MIX_Mixer* m_mixer;
+};
+
+static AudioMixer audioMixer{};
+
+void playSound(SoundId id, int repetition, float gain_ratio) noexcept { audioMixer.play(id, repetition, gain_ratio); }
 class SoundTrack final {
 public:
     SoundTrack(MIX_Track* track, SoundId id, std::chrono::milliseconds fadeIn = std::chrono::milliseconds{0u}) noexcept;
@@ -23,7 +41,9 @@ private:
 
 AudioMixer::AudioMixer() noexcept
     : m_init(MIX_Init())
-    , m_mixer(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)) {}
+    , m_mixer(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)) {
+    play(SoundId::undefined);
+}
 
 AudioMixer::~AudioMixer() noexcept {
     MIX_DestroyMixer(m_mixer);
@@ -41,24 +61,29 @@ void AudioMixer::play(SoundId id, int repetition, float gain_ratio) const noexce
                                           {MIX_CreateTrack(m_mixer), SoundId::slurp},
                                           {MIX_CreateTrack(m_mixer), SoundId::burp},
                                           {MIX_CreateTrack(m_mixer), SoundId::coins_collection},
-                                          {MIX_CreateTrack(m_mixer), SoundId::fridge}};
+                                          {MIX_CreateTrack(m_mixer), SoundId::fridge},
+                                          {MIX_CreateTrack(m_mixer), SoundId::unlock}};
     static_assert(std::size(allSoundTracks) == static_cast<size_t>(SoundId::undefined));
-    SoundTrack& track = allSoundTracks[static_cast<size_t>(id)];
-    track.scaleVolume(gain_ratio);
-    track.setRepetition(repetition);
-    track.play();
+
+    if (id < SoundId::undefined) {
+        SoundTrack& track = allSoundTracks[static_cast<size_t>(id)];
+        track.scaleVolume(gain_ratio);
+        track.setRepetition(repetition);
+        track.play();
+    }
 }
 
 MIX_Audio* getAudio(SoundId id) noexcept {
     static Audio allAudios[] = {
-        {MIX_LoadAudio(nullptr, "assets/sounds/bgm.mp3", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/bgm.ogg", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/boiling_water.mp3", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/sink_running_water.wav", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/bin_open_sound.ogg", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/slurp.wav", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/burp.wav", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/coins.wav", false), MIX_DestroyAudio},
-        {MIX_LoadAudio(nullptr, "assets/sounds/fridge.ogg", false), MIX_DestroyAudio}};
+        {MIX_LoadAudio(nullptr, "assets/sounds/fridge.ogg", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/unlock.ogg", false), MIX_DestroyAudio}};
     static_assert(std::size(allAudios) == static_cast<size_t>(SoundId::undefined));
     return allAudios[static_cast<size_t>(id)].get();
 }

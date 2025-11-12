@@ -55,6 +55,11 @@ enum class ShowId {
     customerMax,
     lastImg,
     moneyNumberText,
+    ratingNumberText,
+    cus1NextText,
+    cus2NextText,
+    cus3NextText,
+    cus4NextText,
     last
 };
 
