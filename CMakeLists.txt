@@ -7,10 +7,60 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebInfo;MinSizeRel")
 endif()
 
-# Put binaries in build/<config>  (works for single- and multi-config)
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+# Put binaries in build/<config>  (works for single- and multi-config)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+
+
+# Build static libs and vendor the codecs
+set(BUILD_SHARED_LIBS OFF)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC  ON  CACHE BOOL "" FORCE)
+# SDL_image options
+set(SDLIMGAE_VENDORED OFF)
+set(SDLIMAGE_DEPS_SHARED OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_PNG     ON  CACHE BOOL "" FORCE)
+set(SDLIMAGE_JPG     OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_GIF OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_AVIF OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_LBM OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_PCX OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_PNM OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_QOI OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_SVG OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_TGA OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_TIF OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_XCF OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_XPM OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_XV OFF  CACHE BOOL "" FORCE)
+set(SDLIMAGE_WEBP    OFF CACHE BOOL "" FORCE)  # enable only if you need it
+# ... AVIF/TIFF/etc OFF for smaller builds
+
+# SDL_ttf (FreeType)
+set(SDLTTF_VENDORED ON)
+set(SDLTTF_HARFBUZZ OFF CACHE BOOL "" FORCE)   # turn ON only if you need shaping
+set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
+
+# SDL_mixer (pick your formats)
+set(SDLMIXER_VENDORED OFF)
+set(SDLMIXER_DEPS_SHARED OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_WAV      ON  CACHE BOOL "" FORCE)
+set(SDLMIXER_OGG      ON  CACHE BOOL "" FORCE)  # Vorbis
+set(SDLMIXER_OPUS     OFF CACHE BOOL "" FORCE)  # ON if you ship Opus
+set(SDLMIXER_MP3      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MOD      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MID      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_SAMPLES      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_AIFF      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_VOC      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_AU      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_FLAC_LIBFLAC      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_FLAC_DRFLAC      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_GME      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MP3_DRMP3      OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MIDI_TIMIDITY      OFF CACHE BOOL "" FORCE)
+
 
 # Dependencies (as you had)
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
@@ -67,4 +117,21 @@ check_ipo_supported(RESULT ipo_supported OUTPUT ipo_msg)
 if(ipo_supported)
   set_property(TARGET Slurpwave PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_property(TARGET Slurpwave PROPERTY INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE)
+endif()
+
+# Detect Emscripten
+if(EMSCRIPTEN)
+  # produce an .html launcher alongside .wasm/.js
+  set_target_properties(Slurpwave PROPERTIES SUFFIX ".html")
+
+  # Web-friendly link options
+  target_link_options(Slurpwave PRIVATE
+    "--preload-file" "$<TARGET_FILE_DIR:Slurpwave>/assets@/assets" # package assets/
+    -sALLOW_MEMORY_GROWTH=1
+    -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES3=1
+    -sASSERTIONS=1
+    -sFORCE_FILESYSTEM=1
+    -sEXPORTED_RUNTIME_METHODS=ccall,cwrap
+  )
+
 endif()

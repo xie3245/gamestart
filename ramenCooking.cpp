@@ -37,7 +37,7 @@ void RamenCooking::handleClick(ElementId elemId) noexcept {
         }
     } break;
     case RamenState::BURNT: {
-        if ((elemId == m_elemId)) {
+        if (elemId == m_elemId) {
             if (attachToMouse(m_elemId, ShowId::pot_burnt)) {
                 m_state = RamenState::IDLE;
                 m_vis.stateChanged(RamenState::IDLE);
