@@ -46,6 +46,7 @@ Renderer::Renderer()
         std::cerr << "Failed to create renderer: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
+    SDL_SetRenderLogicalPresentation(m_renderer, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     SDL_SetRenderVSync(m_renderer, 1);
 }
 

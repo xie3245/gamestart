@@ -76,7 +76,7 @@ void AudioMixer::play(SoundId id, int repetition, float gain_ratio) const noexce
 MIX_Audio* getAudio(SoundId id) noexcept {
     static Audio allAudios[] = {
         {MIX_LoadAudio(nullptr, "assets/sounds/bgm.ogg", false), MIX_DestroyAudio},
-        {MIX_LoadAudio(nullptr, "assets/sounds/boiling_water.mp3", false), MIX_DestroyAudio},
+        {MIX_LoadAudio(nullptr, "assets/sounds/boiling_water.ogg", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/sink_running_water.wav", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/bin_open_sound.ogg", false), MIX_DestroyAudio},
         {MIX_LoadAudio(nullptr, "assets/sounds/slurp.wav", false), MIX_DestroyAudio},

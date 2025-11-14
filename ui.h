@@ -19,11 +19,9 @@ constexpr float appliancesSize    = 50.f + 50.f * SCREEN_HEIGHT / 600.f;
 constexpr float columnX           = SCREEN_WIDTH - appliancesSize - 20.f;
 constexpr float columnFirstY      = SCREEN_HEIGHT - appliancesSize - 20.f;
 constexpr int itemDis             = 10;
-constexpr float cookerSize        = 128.f + 10.f * SCREEN_HEIGHT / 600.f;
 constexpr float burnerSize        = 300.f;
 constexpr float cookerY           = counterHeight + (SCREEN_HEIGHT - counterHeight) * 0.5f;
-constexpr float burnerY           = counterHeight + appliancesSize + 3.f * itemDis;
-constexpr float potSizeCooking    = cookerSize;
+constexpr float potSizeCooking    = 146.f;
 constexpr float potYCooking       = cookerY - potSizeCooking * 0.4f;
 constexpr float cusSize           = 160.f;
 constexpr float cusDis            = 40.f;
@@ -52,6 +50,7 @@ constexpr SDL_FRect softdrink3FDst  = {softdrink2FDst.x + softdrink2FDst.w, drin
 constexpr SDL_FRect softdrink4FDst  = {softdrink3FDst.x + softdrink3FDst.w, drinksy, drinksw, drinksh};
 constexpr SDL_FRect opArea          = {0.f, counterHeight + 20.f, SCREEN_WIDTH, SCREEN_WIDTH - counterHeight - 20.f};
 constexpr SDL_FRect counterRect     = {0.f, counterHeight, SCREEN_WIDTH, 72.f};
+constexpr float burnerY             = counterHeight + postItSize;
 constexpr SDL_FRect moneyFRect      = {10.f, 10.f, 40.f, 40.f};
 constexpr SDL_FRect cust1FRect      = {cusBegin, cusHeight, cusSize, cusSize};
 constexpr SDL_FRect cust2FRect      = {cust1FRect.x + cusSize + cusDis, cusHeight, cusSize, cusSize};
@@ -68,11 +67,6 @@ constexpr SDL_FRect cust4PatienceBarFRect = {cust4FRect.x + 10.f, cust4FRect.y, 
 
 constexpr SDL_FRect burnerFDst = {HALF_WIDTH - burnerSize, burnerY, burnerSize, burnerSize};
 
-constexpr SDL_FRect cookerFDst1 = {HALF_WIDTH - 2.f * cookerSize, cookerY, cookerSize, cookerSize};
-constexpr SDL_FRect cookerFDst2 = {cookerFDst1.x + cookerSize, cookerY, cookerSize, cookerSize};
-constexpr SDL_FRect cookerFDst3 = {cookerFDst2.x + cookerSize, cookerY, cookerSize, cookerSize};
-constexpr SDL_FRect cookerFDst4 = {cookerFDst3.x + cookerSize, cookerY, cookerSize, cookerSize};
-
 constexpr float ratingBarLength = 200.f;
 constexpr float ratingBarWidth  = 40.f;
 constexpr float ratingBarX      = 400.f;
@@ -82,7 +76,7 @@ constexpr SDL_FRect binFRect    = {HALF_WIDTH + itemDis + appliancesSize, counte
                                    appliancesSize};
 
 constexpr float cookingToolX            = HALF_WIDTH * 0.5f;
-constexpr float cookingToolY            = cookerY + cookerSize + itemDis;
+constexpr float cookingToolY            = burnerFDst.y + burnerFDst.h;
 constexpr SDL_FRect potToolFRect        = {cookingToolX, cookingToolY, cookingToolSize, cookingToolSize};
 constexpr SDL_FRect chopsticksToolFRect = {potToolFRect.x + cookingToolSize + itemDis, cookingToolY, cookingToolSize,
                                            cookingToolSize};
@@ -105,18 +99,23 @@ constexpr SDL_FRect potFDst4 = {potFDst3.x + burnerFDst.w * 0.36f, potFDst3.y, p
 
 constexpr float puffSize             = 80.f;
 constexpr float potZoomDiff          = 0.1f;
-constexpr SDL_FRect puffFDst1        = {potFDst1.x, potFDst1.y - 30.f, puffSize, puffSize};
-constexpr SDL_FRect puffFDst2        = {potFDst2.x, potFDst2.y - 30.f, puffSize, puffSize};
-constexpr SDL_FRect puffFDst3        = {potFDst3.x, potFDst3.y - 30.f, puffSize, puffSize};
-constexpr SDL_FRect puffFDst4        = {potFDst4.x, potFDst4.y - 30.f, puffSize, puffSize};
+constexpr float puffYdiff            = 30.f;
+constexpr SDL_FRect puffFDst1        = {potFDst1.x, potFDst1.y - puffYdiff, puffSize, puffSize};
+constexpr SDL_FRect puffFDst2        = {potFDst2.x, potFDst2.y - puffYdiff, puffSize, puffSize};
+constexpr SDL_FRect puffFDst3        = {potFDst3.x, potFDst3.y - puffYdiff, puffSize, puffSize};
+constexpr SDL_FRect puffFDst4        = {potFDst4.x, potFDst4.y - puffYdiff, puffSize, puffSize};
 constexpr SDL_FRect puffZoomedFDst1  = {potFDst1.x - potZoomDiff * 0.05f * potSizeCooking,
-                                        potFDst1.y - 30.f - potZoomDiff * 0.05f * potSizeCooking, puffSize, puffSize};
+                                        potFDst1.y - puffYdiff - potZoomDiff * 0.05f * potSizeCooking, puffSize,
+                                        puffSize};
 constexpr SDL_FRect puffZoomedFDst2  = {potFDst2.x - potZoomDiff * 0.05f * potSizeCooking,
-                                        potFDst2.y - 30.f - potZoomDiff * 0.05f * potSizeCooking, puffSize, puffSize};
+                                        potFDst2.y - puffYdiff - potZoomDiff * 0.05f * potSizeCooking, puffSize,
+                                        puffSize};
 constexpr SDL_FRect puffZoomedFDst3  = {potFDst3.x - potZoomDiff * 0.05f * potSizeCooking,
-                                        potFDst3.y - 30.f - potZoomDiff * 0.05f * potSizeCooking, puffSize, puffSize};
+                                        potFDst3.y - puffYdiff - potZoomDiff * 0.05f * potSizeCooking, puffSize,
+                                        puffSize};
 constexpr SDL_FRect puffZoomedFDst4  = {potFDst4.x - potZoomDiff * 0.05f * potSizeCooking,
-                                        potFDst4.y - 30.f - potZoomDiff * 0.05f * potSizeCooking, puffSize, puffSize};
+                                        potFDst4.y - puffYdiff - potZoomDiff * 0.05f * potSizeCooking, puffSize,
+                                        puffSize};
 constexpr float servedRamenSize      = 80.f;
 constexpr float servedDrinkSize      = 80.f;
 constexpr SDL_FRect servedRamenFDst1 = {cust1FRect.x + cusSize * 0.3f, cust1FRect.y + cusSize * 0.7f, servedRamenSize,

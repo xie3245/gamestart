@@ -237,7 +237,7 @@ void hideServed(ElementId cus) noexcept {
     getElement(servedRamenId(cus)).visible = false;
 }
 
-constexpr float drinksUnlockThreshold = 15.f;
+constexpr float drinksUnlockThreshold = 4.f;
 
 void triggerSpecialEvents() noexcept {
     if (!softdrink && (averageRating > drinksUnlockThreshold)) {

@@ -122,11 +122,12 @@ endif()
 # Detect Emscripten
 if(EMSCRIPTEN)
   # produce an .html launcher alongside .wasm/.js
-  set_target_properties(Slurpwave PROPERTIES SUFFIX ".html")
+  set_target_properties(Slurpwave PROPERTIES SUFFIX ".html" OUTPUT_NAME "index")
 
   # Web-friendly link options
   target_link_options(Slurpwave PRIVATE
-    "--preload-file" "$<TARGET_FILE_DIR:Slurpwave>/assets@/assets" # package assets/
+    "--shell-file" "${CMAKE_SOURCE_DIR}/web/shell_itch.html"
+    "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets" # package assets/
     -sALLOW_MEMORY_GROWTH=1
     -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES3=1
     -sASSERTIONS=1
